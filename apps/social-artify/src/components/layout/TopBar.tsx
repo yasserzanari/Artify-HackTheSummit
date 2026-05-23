@@ -2,18 +2,24 @@
 
 interface TopBarProps {
   onFilterClick?: () => void;
+  pageTitle?: string;
 }
 
-export default function TopBar({ onFilterClick }: TopBarProps) {
+export default function TopBar({ onFilterClick, pageTitle = "Discover" }: TopBarProps) {
   return (
     <header className="flex items-center justify-between h-14 px-5 bg-background shrink-0">
-      {/* Wordmark */}
+      {/* Logo — mobile seulement (la sidebar desktop l'affiche) */}
       <span
-        className="text-xl font-bold text-text"
+        className="text-xl font-bold text-text lg:hidden"
         style={{ fontFamily: "var(--font-serif)" }}
       >
         Artify
         <span className="text-primary">.</span>
+      </span>
+
+      {/* Titre de page — desktop seulement */}
+      <span className="hidden lg:block text-sm font-semibold uppercase tracking-widest text-muted">
+        {pageTitle}
       </span>
 
       {/* Actions */}

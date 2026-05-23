@@ -70,7 +70,10 @@ function DraggableCard({ artwork, onLike, onPass, onCardTap }: DraggableCardProp
             className="text-base font-bold text-green-400 border-2 border-green-400 px-3 py-1 rounded-md"
             style={{ transform: "rotate(-14deg)", textShadow: "0 1px 4px rgba(0,0,0,.5)" }}
           >
-            LIKE ♥
+            <span className="flex items-center gap-1">
+              LIKE
+              <span className="material-icons" style={{ fontSize: "16px", lineHeight: 1 }}>favorite</span>
+            </span>
           </span>
         </motion.div>
         <motion.div
@@ -135,7 +138,9 @@ const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
     if (topIndex >= artworks.length) {
       return (
         <div className="flex flex-col items-center justify-center w-full h-full gap-4 text-center px-6">
-          <div className="text-4xl select-none">🖼️</div>
+          <span className="material-icons select-none" style={{ fontSize: "3rem", color: "var(--color-border)" }}>
+            image
+          </span>
           <p className="font-bold text-lg" style={{ fontFamily: "var(--font-serif)" }}>
             You&apos;ve seen it all
           </p>

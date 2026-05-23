@@ -155,7 +155,12 @@ export default function AuthModal() {
                         backgroundColor: role === r ? "#F3E1E8" : "transparent",
                       }}
                     >
-                      {r === "viewer" ? "🎨 Art Lover" : "✏️ Artist"}
+                      <span className="flex items-center justify-center gap-1.5">
+                        <span className="material-icons" style={{ fontSize: "16px", lineHeight: 1 }}>
+                          {r === "viewer" ? "palette" : "draw"}
+                        </span>
+                        {r === "viewer" ? "Art Lover" : "Artist"}
+                      </span>
                     </button>
                   ))}
                 </div>

@@ -34,12 +34,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Desktop frame — makes the app feel framed in a gallery on large screens */
-@media (min-width: 768px) {
-  html {
-    background: #120A04;
-  }
-}
 
 /* scrollbar hide utility */
 .scrollbar-hide::-webkit-scrollbar {

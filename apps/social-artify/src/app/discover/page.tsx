@@ -88,25 +88,26 @@ export default function DiscoverPage() {
   const topForActionBar = currentArtwork ?? filtered[0] ?? null;
 
   return (
-    /* Dark gallery frame shows on desktop outside this container */
-    <div className="flex flex-col h-dvh bg-background overflow-hidden md:max-w-120 md:mx-auto md:shadow-2xl">
+    <div className="flex flex-col h-dvh bg-background overflow-hidden lg:pl-50">
       <TopBar />
       <CategoryFilter />
 
-      <p className="text-center text-[11px] font-semibold tracking-widest text-muted/60 uppercase pt-1 pb-0.5 shrink-0">
+      <p className="text-center text-[11px] font-semibold tracking-widest text-muted/60 uppercase pt-1 pb-0.5 shrink-0 lg:hidden">
         Swipe to vote · Tap to view
       </p>
 
-      {/* Card deck */}
-      <div className="flex-1 relative px-4 pt-2 pb-1 min-h-0">
-        <SwipeDeck
-          ref={deckRef}
-          artworks={filtered}
-          onLike={handleLike}
-          onPass={handlePass}
-          onCardTap={handleCardTap}
-          onTopCardChange={handleTopCardChange}
-        />
+      {/* Card deck — centré et contrainte à 440px sur desktop */}
+      <div className="flex-1 relative px-4 pt-2 pb-1 min-h-0 lg:flex lg:items-center lg:justify-center">
+        <div className="relative w-full h-full lg:max-w-110 lg:h-full">
+          <SwipeDeck
+            ref={deckRef}
+            artworks={filtered}
+            onLike={handleLike}
+            onPass={handlePass}
+            onCardTap={handleCardTap}
+            onTopCardChange={handleTopCardChange}
+          />
+        </div>
       </div>
 
       <ActionBar
@@ -117,8 +118,8 @@ export default function DiscoverPage() {
 
       <GuestBanner />
 
-      {/* Spacer for floating pill nav (≈ 96px clears the pill + bottom offset) */}
-      <div className="h-24 shrink-0" />
+      {/* Spacer pour le pill nav mobile — caché sur desktop (sidebar remplace) */}
+      <div className="h-24 shrink-0 lg:hidden" />
       <BottomNav />
       <AuthModal />
     </div>

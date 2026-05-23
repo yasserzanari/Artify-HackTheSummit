@@ -19,20 +19,6 @@ const tabs = [
     ),
   },
   {
-    href: "/artist/upload",
-    label: "3D",
-    match: (p: string) => p.startsWith("/artist"),
-    icon: (_active: boolean) => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-        stroke="#810B38" strokeWidth="2"
-        strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-        <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-        <line x1="12" y1="22.08" x2="12" y2="12" />
-      </svg>
-    ),
-  },
-  {
     href: "/profile",
     label: "You",
     match: (p: string) => p === "/profile",
@@ -51,42 +37,88 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav
-      className="fixed z-40 left-1/2 -translate-x-1/2"
-      style={{
-        bottom: "max(20px, calc(env(safe-area-inset-bottom, 0px) + 16px))",
-      }}
-    >
-      <div
-        className="flex items-center rounded-full border border-border shadow-2xl overflow-hidden"
+    <>
+      {/* ── Mobile : pill flottant (inchangé) — caché sur desktop ── */}
+      <nav
+        className="lg:hidden fixed z-40 left-1/2 -translate-x-1/2"
         style={{
-          backgroundColor: "var(--color-surface)",
-          boxShadow: "0 8px 32px rgba(18, 10, 4, 0.35), 0 2px 8px rgba(18, 10, 4, 0.2)",
+          bottom: "max(20px, calc(env(safe-area-inset-bottom, 0px) + 16px))",
         }}
       >
-        {tabs.map((tab) => {
-          const isActive = tab.match(pathname);
-
-          return (
-            <Link
-              key={tab.label}
-              href={tab.href}
-              className="flex flex-col items-center gap-1 px-7 py-3 min-w-[72px] transition-colors"
-              style={{
-                borderRight: tab.label !== "You" ? "1px solid var(--color-border)" : undefined,
-              }}
-            >
-              {tab.icon(isActive)}
-              <span
-                className="text-[9px] font-semibold uppercase tracking-widest leading-none"
-                style={{ color: isActive ? "#810B38" : "#6B4A36" }}
+        <div
+          className="flex items-center rounded-full border border-border shadow-2xl overflow-hidden"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            boxShadow: "0 8px 32px rgba(18, 10, 4, 0.35), 0 2px 8px rgba(18, 10, 4, 0.2)",
+          }}
+        >
+          {tabs.map((tab) => {
+            const isActive = tab.match(pathname);
+            return (
+              <Link
+                key={tab.label}
+                href={tab.href}
+                className="flex flex-col items-center gap-1 px-7 py-3 min-w-[72px] transition-colors"
+                style={{
+                  borderRight: tab.label !== "You" ? "1px solid var(--color-border)" : undefined,
+                }}
               >
-                {tab.label}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
+                {tab.icon(isActive)}
+                <span
+                  className="text-[9px] font-semibold uppercase tracking-widest leading-none"
+                  style={{ color: isActive ? "#810B38" : "#6B4A36" }}
+                >
+                  {tab.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+
+      {/* ── Desktop : sidebar gauche fixe — cachée sur mobile ── */}
+      <nav
+        className="hidden lg:flex flex-col fixed left-0 top-0 h-full w-[200px] z-40 border-r border-border shrink-0"
+        style={{ backgroundColor: "var(--color-surface)" }}
+      >
+        {/* Logo */}
+        <div className="px-6 pt-8 pb-6">
+          <span
+            className="text-xl font-bold text-text"
+            style={{ fontFamily: "var(--font-serif)" }}
+          >
+            Artify<span className="text-primary">.</span>
+          </span>
+        </div>
+
+        {/* Séparateur */}
+        <div className="h-px bg-border mx-4 mb-4" />
+
+        {/* Nav links verticaux */}
+        <div className="flex flex-col gap-1 px-3">
+          {tabs.map((tab) => {
+            const isActive = tab.match(pathname);
+            return (
+              <Link
+                key={tab.label}
+                href={tab.href}
+                className="flex items-center gap-3 px-3 py-3 rounded-xl transition-colors"
+                style={{
+                  backgroundColor: isActive ? "var(--color-background)" : "transparent",
+                }}
+              >
+                {tab.icon(isActive)}
+                <span
+                  className="text-sm font-semibold tracking-wide"
+                  style={{ color: isActive ? "#810B38" : "#6B4A36" }}
+                >
+                  {tab.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+    </>
   );
 }
