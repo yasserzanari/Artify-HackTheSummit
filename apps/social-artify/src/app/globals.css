@@ -8,10 +8,10 @@
   --color-muted: #6B4A36;       /* warm dark brown — secondary text */
   --color-border: #C2A07A;      /* mid-tan — visible on both bg & surface */
 
-  /* Avant Garde Gothic → Josefin Sans as web fallback */
-  --font-sans: "ITC Avant Garde Gothic", "Avant Garde Gothic", var(--font-avant-garde), "Century Gothic", Futura, sans-serif;
-  /* Cooper BT → Fraunces as web fallback */
-  --font-serif: "Cooper BT", "Cooper", var(--font-cooper), Georgia, serif;
+  /* Body — Inter (modern, readable) */
+  --font-sans: var(--font-sans-var), Inter, system-ui, -apple-system, sans-serif;
+  /* Display / headings — Playfair Display (editorial serif) */
+  --font-serif: var(--font-serif-var), "Playfair Display", Georgia, serif;
 
   --radius-card: 12px;
   --radius-pill: 9999px;

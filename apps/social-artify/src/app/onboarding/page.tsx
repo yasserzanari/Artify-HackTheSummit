@@ -73,13 +73,12 @@ export default function OnboardingPage() {
               A NEW WAY TO SEE ART
             </p>
 
-            {/* Headline — fonte Cooper BT / Fraunces */}
+            {/* Headline — Playfair Display */}
             <h1
               className="font-bold leading-[1.08] mb-5 text-white lg:text-text"
               style={{
                 fontFamily: "var(--font-serif)",
                 fontSize: "clamp(2.4rem, 5vw, 3.5rem)",
-                fontStyle: "italic",
                 letterSpacing: "-0.01em",
               }}
             >
@@ -132,8 +131,8 @@ export default function OnboardingPage() {
 
           {/* Font debug — petite ligne en bas qui confirme que la font custom charge */}
           <p className="mt-6 text-[10px] text-white/30 lg:text-muted/40 text-center select-none"
-            style={{ fontFamily: "var(--font-avant-garde)" }}>
-            Josefin Sans · Fraunces — custom fonts active
+            style={{ fontFamily: "var(--font-serif)" }}>
+            Inter · Playfair Display — custom fonts active
           </p>
         </div>
       </div>
