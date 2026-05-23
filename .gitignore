@@ -36,6 +36,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# But always commit example/template files — they contain no secrets
+!.env.example
+!.env.template
+!.env.sample
 
 # vercel
 .vercel
@@ -49,6 +53,15 @@ apps/*/next-env.d.ts
 AGENTS.md
 certificates/
 apps/*/certificates/
+
+# GCP service account keys — NEVER commit these
+*-service-account*.json
+*service_account*.json
+gcp-*.json
+secrets/
+apps/*/secrets/
+# Match the exact pattern of a downloaded GCP service-account JSON: <project-id>-<key-id>.json
+totemic-veld-*.json
 
 # local operational scripts
 scripts/

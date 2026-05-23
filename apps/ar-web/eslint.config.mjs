@@ -16,6 +16,20 @@ const eslintConfig = defineConfig([
     "docs/**",
     "public/ar/libs/**",
   ]),
+  {
+    // Allow underscore-prefixed unused variables (standard convention for
+    // intentionally unused interface-required parameters in mocks / stubs).
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;
