@@ -1,0 +1,10 @@
+[
+  {
+    "id": "a31b2947-c47d-4b6d-aa87-5f73a7214031",
+    "name": "Mario",
+    "email": "mario@test.com",
+    "role": "artist",
+    "createdAt": "2026-05-23T20:51:21.444Z",
+    "password": "$2b$10$wh4tdb/t/zAGBTzyi17QKuD.8Jxg6/CNeBT1paK/mPCqWzQYJPre."
+  }
+]

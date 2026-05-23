@@ -1,1 +1,22 @@
 @import "tailwindcss";
+
+@theme {
+  --color-background: #F5F0E8;
+  --color-primary:    #C0392B;
+  --color-text:       #1A1A1A;
+  --color-muted:      #5A5A5A;
+  --color-surface:    #FFFFFF;
+  --color-border:     #E0D8CC;
+
+  --font-serif: var(--font-playfair), Georgia, serif;
+  --font-sans:  var(--font-inter), system-ui, sans-serif;
+
+  --radius-card: 12px;
+  --radius-pill: 9999px;
+}
+
+body {
+  background-color: #F5F0E8;
+  color: #1A1A1A;
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
