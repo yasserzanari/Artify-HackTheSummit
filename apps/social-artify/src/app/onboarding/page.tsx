@@ -5,8 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAuthStore } from "@/store/authStore";
 import AuthModal from "@/components/auth/AuthModal";
 
-const MONA_LISA_URL =
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/800px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg";
+const BG_IMAGE = "/images/BackgroundImage.webp";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -36,7 +35,7 @@ export default function OnboardingPage() {
         <div
           className="absolute inset-0 lg:hidden"
           style={{
-            backgroundImage: `url(${MONA_LISA_URL})`,
+            backgroundImage: `url(${BG_IMAGE})`,
             backgroundSize: "cover",
             backgroundPosition: "center top",
           }}
@@ -145,7 +144,7 @@ export default function OnboardingPage() {
       <div
         className="hidden lg:block lg:w-1/2 shrink-0"
         style={{
-          backgroundImage: `url(${MONA_LISA_URL})`,
+          backgroundImage: `url(${BG_IMAGE})`,
           backgroundSize: "cover",
           backgroundPosition: "center top",
         }}

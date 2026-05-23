@@ -13,7 +13,7 @@ export const SEED_ARTWORKS: Artwork[] = [
     location: "The Hague",
     categories: ["Baroque", "Portraits"],
     imageUrl:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/1665_Girl_with_a_Pearl_Earring.jpg/800px-1665_Girl_with_a_Pearl_Earring.jpg",
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/1665_Girl_with_a_Pearl_Earring.jpg/1280px-1665_Girl_with_a_Pearl_Earring.jpg",
     has3D: false,
     description:
       "Often called the 'Mona Lisa of the North'. A single pearl catches the light — the sitter's identity remains art history's greatest mystery.",
@@ -34,7 +34,7 @@ export const SEED_ARTWORKS: Artwork[] = [
     location: "Rome",
     categories: ["Italian Baroque"],
     imageUrl:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Caravaggio_Judith_Beheading_Holofernes.jpg/800px-Caravaggio_Judith_Beheading_Holofernes.jpg",
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Caravaggio_Judith_Beheading_Holofernes.jpg/1280px-Caravaggio_Judith_Beheading_Holofernes.jpg",
     has3D: false,
     description:
       "Caravaggio's dramatic chiaroscuro turns a biblical scene into a visceral, almost uncomfortable confrontation.",
@@ -55,7 +55,7 @@ export const SEED_ARTWORKS: Artwork[] = [
     location: "Paris",
     categories: ["Renaissance", "Portraits"],
     imageUrl:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/800px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg",
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/1280px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg",
     has3D: true,
     arWebId: "mona-lisa",
     description:
@@ -99,7 +99,7 @@ export const SEED_ARTWORKS: Artwork[] = [
     location: "Oslo",
     categories: ["Expressionism"],
     imageUrl:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg/800px-Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg",
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg/1280px-Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg",
     has3D: true,
     arWebId: "the-scream",
     description:
@@ -126,6 +126,46 @@ export const SEED_ARTWORKS: Artwork[] = [
     description:
       "The goddess of love emerges from the sea on a shell. A defining image of the Italian Renaissance.",
     likes: 512,
+    likedBy: [],
+    savedBy: [],
+    createdAt: "2024-01-01T00:00:00.000Z",
+  },
+  {
+    id: "vangogh-yellow-house",
+    title: "The Yellow House",
+    artistName: "Vincent van Gogh",
+    artistId: "seed-vangogh",
+    medium: "Oil on canvas",
+    year: 1888,
+    dimensions: "72 × 91.5 cm",
+    museum: "Van Gogh Museum",
+    location: "Amsterdam",
+    categories: ["Post-Impressionism"],
+    imageUrl: "/images/Van-Gogh-The-Yellow-House-1888-Arles-1024-x-695.webp",
+    has3D: false,
+    description:
+      "The house Van Gogh rented in Arles, where he dreamed of founding an artists' colony. The fierce Provençal sunlight is captured in pure chrome yellow.",
+    likes: 389,
+    likedBy: [],
+    savedBy: [],
+    createdAt: "2024-01-01T00:00:00.000Z",
+  },
+  {
+    id: "vangogh-self-portrait-1889",
+    title: "Self-Portrait",
+    artistName: "Vincent van Gogh",
+    artistId: "seed-vangogh",
+    medium: "Oil on canvas",
+    year: 1889,
+    dimensions: "65 × 54 cm",
+    museum: "Musée d'Orsay",
+    location: "Paris",
+    categories: ["Post-Impressionism", "Portraits"],
+    imageUrl: "/images/Vincent-Van-Gogh-Self-portrait-1889-St-Remy-de-Provence-scaled.webp",
+    has3D: false,
+    description:
+      "Painted at Saint-Rémy asylum, one of his last self-portraits. The swirling brushwork of the background contrasts with his composed, almost defiant gaze.",
+    likes: 714,
     likedBy: [],
     savedBy: [],
     createdAt: "2024-01-01T00:00:00.000Z",

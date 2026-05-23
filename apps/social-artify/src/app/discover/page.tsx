@@ -1,9 +1,10 @@
 "use client";
-import { useRef, useState, useCallback, useMemo } from "react";
+import { useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useFeedStore } from "@/store/feedStore";
 import { useAuthStore } from "@/store/authStore";
 import { useAuth } from "@/hooks/useAuth";
+import { useArtworks } from "@/hooks/useArtworks";
 import type { Artwork } from "@/lib/types";
 
 import TopBar from "@/components/layout/TopBar";
@@ -18,12 +19,14 @@ export default function DiscoverPage() {
   const router = useRouter();
   const deckRef = useRef<SwipeDeckHandle>(null);
 
-  const artworks = useFeedStore((s) => s.artworks);
   const activeCategory = useFeedStore((s) => s.activeCategory);
   const likeArtwork = useFeedStore((s) => s.likeArtwork);
   const user = useAuthStore((s) => s.user);
   const setPendingAction = useAuthStore((s) => s.setPendingAction);
   const setAuthModalOpen = useAuthStore((s) => s.setAuthModalOpen);
+
+  // Artworks filtrés par catégorie active via le hook centralisé
+  const { artworks: filtered } = useArtworks(activeCategory);
 
   // Track top card so ActionBar stays in sync with the deck
   const [currentArtwork, setCurrentArtwork] = useState<Artwork | null>(null);
@@ -33,19 +36,6 @@ export default function DiscoverPage() {
 
   // Initialise auth from localStorage
   useAuth();
-
-  // Filter by active category — memoised so the array ref is stable
-  const filtered = useMemo(
-    () =>
-      artworks.filter((a) => {
-        if (activeCategory === "All") return true;
-        if (activeCategory === "New 3D") return a.has3D;
-        return a.categories.some((c) =>
-          c.toLowerCase().includes(activeCategory.toLowerCase())
-        );
-      }),
-    [artworks, activeCategory]
-  );
 
   // ── Like handler (shared by swipe and ActionBar) ─────────────────────────
   const handleLike = useCallback(
@@ -88,7 +78,7 @@ export default function DiscoverPage() {
   const topForActionBar = currentArtwork ?? filtered[0] ?? null;
 
   return (
-    <div className="flex flex-col h-dvh bg-background overflow-hidden lg:pl-50">
+    <div className="flex flex-col h-dvh overflow-hidden lg:pl-50">
       <TopBar />
       <CategoryFilter />
 

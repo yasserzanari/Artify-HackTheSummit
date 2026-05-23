@@ -46,6 +46,29 @@ export default function RootLayout({
         />
       </head>
       <body className={`${josefinSans.variable} ${fraunces.variable}`}>
+        {/* ── Global animated background ── */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: -10,
+            overflow: "hidden",
+            pointerEvents: "none",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              inset: "-10%",
+              backgroundImage: "url('/images/BackgroundImage.webp')",
+              backgroundSize: "cover",
+              backgroundPosition: "center top",
+              opacity: 0,
+              animation: "bgFadeIn 2.5s ease forwards, kenBurns 60s ease-in-out 2.5s infinite",
+            }}
+          />
+        </div>
         {children}
       </body>
     </html>

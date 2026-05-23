@@ -62,7 +62,7 @@ export default function ArtworkDetailPage({
      * Mobile  : flex-col, min-h-dvh, scrollable page
      * Desktop : flex-col (header + content row), h-dvh, offset by sidebar (pl-50)
      */
-    <div className="flex flex-col min-h-dvh bg-background lg:pl-50 lg:h-dvh lg:overflow-hidden">
+    <div className="flex flex-col min-h-dvh lg:pl-50 lg:h-dvh lg:overflow-hidden">
 
       {/* ── Header desktop (Back + actions) — caché sur mobile ── */}
       <div className="hidden lg:flex items-center justify-between px-8 h-14 shrink-0 border-b border-border bg-background">
@@ -115,6 +115,8 @@ export default function ArtworkDetailPage({
             src={artwork.imageUrl}
             alt={artwork.title}
             className="absolute inset-0 w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+            crossOrigin="anonymous"
           />
 
           {/* Gradient at top for icon legibility */}

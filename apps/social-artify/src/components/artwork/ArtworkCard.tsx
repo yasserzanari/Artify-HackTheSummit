@@ -29,6 +29,8 @@ export default function ArtworkCard({ artwork, compact }: ArtworkCardProps) {
           className="absolute inset-0 w-full h-full object-cover"
           draggable={false}
           loading="eager"
+          referrerPolicy="no-referrer"
+          crossOrigin="anonymous"
           style={{
             opacity: loaded ? 1 : 0,
             transition: "opacity 0.5s ease",
