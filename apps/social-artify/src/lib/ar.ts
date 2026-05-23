@@ -1,0 +1,6 @@
+const AR_WEB_URL =
+  process.env.NEXT_PUBLIC_AR_WEB_URL ?? "http://localhost:3000";
+
+export function buildArExperienceUrl(arWebId: string): string {
+  return `${AR_WEB_URL}/ar?artwork=${arWebId}`;
+}

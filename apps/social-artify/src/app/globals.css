@@ -1,1 +1,51 @@
 @import "tailwindcss";
+
+@theme {
+  --color-background: #F1E2D1;  /* warm cream — main page bg */
+  --color-surface: #DCC3AA;     /* warm tan — cards, panels, secondary bg */
+  --color-primary: #810B38;     /* deep burgundy — CTAs, accents, links */
+  --color-text: #1A1A1A;        /* near-black — high contrast on all bg */
+  --color-muted: #6B4A36;       /* warm dark brown — secondary text */
+  --color-border: #C2A07A;      /* mid-tan — visible on both bg & surface */
+
+  /* Avant Garde Gothic → Josefin Sans as web fallback */
+  --font-sans: "ITC Avant Garde Gothic", "Avant Garde Gothic", var(--font-avant-garde), "Century Gothic", Futura, sans-serif;
+  /* Cooper BT → Fraunces as web fallback */
+  --font-serif: "Cooper BT", "Cooper", var(--font-cooper), Georgia, serif;
+
+  --radius-card: 12px;
+  --radius-pill: 9999px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #F1E2D1;
+  color: #1A1A1A;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Desktop frame — makes the app feel framed in a gallery on large screens */
+@media (min-width: 768px) {
+  html {
+    background: #120A04;
+  }
+}
+
+/* scrollbar hide utility */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

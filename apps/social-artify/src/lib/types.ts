@@ -19,9 +19,10 @@ export interface Artwork {
   dimensions?: string;
   museum?: string;
   location?: string;
-  categories: string[]; // e.g. ['Baroque', 'Portraits']
+  categories: string[];
   imageUrl: string;
   has3D: boolean;
+  arWebId?: string; // matches ar-web artwork ID if has3D is true
   description?: string;
   likes: number;
   likedBy: string[]; // user IDs
