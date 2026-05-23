@@ -1,22 +1,41 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #F5F0E8;
-  --color-primary:    #C0392B;
-  --color-text:       #1A1A1A;
-  --color-muted:      #5A5A5A;
-  --color-surface:    #FFFFFF;
-  --color-border:     #E0D8CC;
+  --color-background: #F1E2D1;
+  --color-surface: #DCC3AA;
+  --color-primary: #810B38;
+  --color-text: #1A1A1A;
+  --color-muted: #6B4A36;
+  --color-border: #C2A07A;
 
-  --font-serif: var(--font-playfair), Georgia, serif;
-  --font-sans:  var(--font-inter), system-ui, sans-serif;
+  --font-sans: "ITC Avant Garde Gothic", "Avant Garde Gothic", var(--font-avant-garde), "Century Gothic", Futura, sans-serif;
+  --font-serif: "Cooper BT", "Cooper", var(--font-cooper), Georgia, serif;
 
   --radius-card: 12px;
   --radius-pill: 9999px;
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
 body {
-  background-color: #F5F0E8;
+  margin: 0;
+  padding: 0;
+  background-color: #F1E2D1;
   color: #1A1A1A;
-  font-family: var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

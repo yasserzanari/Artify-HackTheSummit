@@ -1,23 +1,33 @@
-import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Josefin_Sans, Fraunces } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const josefinSans = Josefin_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-avant-garde",
+  weight: ["100", "200", "300", "400", "600", "700"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
-const playfair = Playfair_Display({
+const fraunces = Fraunces({
   subsets: ["latin"],
-  variable: "--font-playfair",
+  variable: "--font-cooper",
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Social Artify",
-  description: "Discover art you love, swipe to explore.",
-  themeColor: "#F5F0E8",
+  title: "Artify — Discover Art",
+  description: "Discover art you love. Swipe through masterpieces, like, save, and see them in 3D.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#F1E2D1",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({
@@ -26,8 +36,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
-      <body className="bg-[#F5F0E8] text-[#1A1A1A] font-sans antialiased">
+    <html lang="en">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          rel="stylesheet"
+        />
+      </head>
+      <body className={`${josefinSans.variable} ${fraunces.variable}`}>
         {children}
       </body>
     </html>

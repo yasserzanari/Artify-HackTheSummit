@@ -1,14 +1,40 @@
-// Zustand store for the discover feed — artworks, likes, saves, active category
-// TODO: implement with zustand + persist middleware
+"use client";
+
+import { create } from "zustand";
 import type { Artwork } from "@/lib/types";
 
-export interface FeedStore {
+interface FeedStore {
   artworks: Artwork[];
-  swipedIds: string[]; // already liked or skipped this session
-  activeCategory: string; // "All" | "Baroque" | "Renaissance" | ...
-  likeArtwork: (artworkId: string, userId: string) => void;
-  saveArtwork: (artworkId: string, userId: string) => void;
-  skipArtwork: (artworkId: string) => void;
-  prependArtwork: (artwork: Artwork) => void;
+  activeCategory: string;
+  setArtworks: (artworks: Artwork[]) => void;
   setCategory: (category: string) => void;
+  likeArtwork: (artworkId: string, userId: string) => void;
+  unlikeArtwork: (artworkId: string, userId: string) => void;
 }
+
+export const useFeedStore = create<FeedStore>((set) => ({
+  artworks: [],
+  activeCategory: "All",
+
+  setArtworks: (artworks) => set({ artworks }),
+  setCategory: (activeCategory) => set({ activeCategory }),
+
+  // Mise à jour optimiste — l'UI réagit immédiatement, l'API confirme en fond
+  likeArtwork: (artworkId, userId) =>
+    set((state) => ({
+      artworks: state.artworks.map((a) =>
+        a.id === artworkId
+          ? { ...a, likes: a.likes + 1, likedBy: [...a.likedBy, userId] }
+          : a
+      ),
+    })),
+
+  unlikeArtwork: (artworkId, userId) =>
+    set((state) => ({
+      artworks: state.artworks.map((a) =>
+        a.id === artworkId
+          ? { ...a, likes: Math.max(0, a.likes - 1), likedBy: a.likedBy.filter((id) => id !== userId) }
+          : a
+      ),
+    })),
+}));
