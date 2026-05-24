@@ -38,7 +38,7 @@ export default function BottomNav() {
 
   return (
     <>
-      {/* ── Mobile : pill flottant (inchangé) — caché sur desktop ── */}
+      {/* ── Mobile : pill flottant — caché sur desktop ── */}
       <nav
         className="lg:hidden fixed z-40 left-1/2 -translate-x-1/2"
         style={{

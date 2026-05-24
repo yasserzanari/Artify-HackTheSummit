@@ -1,174 +1,135 @@
 "use client";
-
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useAuthStore } from "@/store/authStore";
-import { useAuth } from "@/hooks/useAuth";
-import { useLike } from "@/hooks/useLike";
+import { useRouter } from "next/navigation";
+import { useAuthStore, useAuth } from "@/store/auth";
+import { useFeedStore } from "@/store/feed";
 import { buildArExperienceUrl } from "@/lib/ar";
-import { APP_BASE } from "@/lib/api";
 import BottomNav from "@/components/layout/BottomNav";
-import LikeButton from "@/components/social/LikeButton";
 import AuthModal from "@/components/auth/AuthModal";
-import type { Artwork } from "@/lib/types";
+import type { Artwork } from "@/types";
 
-export default function ArtworkDetailPage() {
-  const params = useParams<{ id: string }>();
-  const id = params.id;
+export default function ArtworkDetailPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const router = useRouter();
 
   const [artwork, setArtwork] = useState<Artwork | null>(null);
   const [isSaved, setIsSaved] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likes, setLikes] = useState(0);
+  const [notFound, setNotFound] = useState(false);
 
   const user = useAuthStore((s) => s.user);
   const setPendingAction = useAuthStore((s) => s.setPendingAction);
   const setAuthModalOpen = useAuthStore((s) => s.setAuthModalOpen);
+  const upsertArtwork = useFeedStore((s) => s.upsertArtwork);
 
   useAuth();
-  useLike(id);
 
-  // Fetch artwork from the real API
   useEffect(() => {
-    fetch(`${APP_BASE}/api/artworks/${id}`, { credentials: "include" })
+    fetch(`/api/artworks/${id}`, { credentials: "include" })
       .then((r) => r.json())
       .then((data) => {
-        if (data.artwork) {
-          setArtwork(data.artwork);
-          setIsSaved(data.artwork.isSavedByMe ?? false);
-        }
+        if (!data.artwork) return setNotFound(true);
+        const a: Artwork = data.artwork;
+        setArtwork(a);
+        setIsSaved(a.isSavedByMe ?? false);
+        setIsLiked(a.isLikedByMe ?? false);
+        setLikes(a.likes ?? 0);
+        upsertArtwork(a);
       })
-      .catch(console.error);
-  }, [id]);
+      .catch(() => setNotFound(true));
+  }, [id, upsertArtwork]);
+
+  const handleLike = async () => {
+    if (!user) { setPendingAction({ type: "like", artworkId: id }); setAuthModalOpen(true); return; }
+    const wasLiked = isLiked;
+    setIsLiked(!wasLiked);
+    setLikes((n) => wasLiked ? Math.max(0, n - 1) : n + 1);
+    try {
+      const res = await fetch(`/api/artworks/${id}?action=like`, { method: "POST", credentials: "include" });
+      const data = await res.json();
+      if (res.ok) {
+        setIsLiked(data.liked);
+        setLikes(data.likes);
+        data.liked ? useFeedStore.getState().likeArtwork(id, user.id) : useFeedStore.getState().unlikeArtwork(id, user.id);
+      } else {
+        setIsLiked(wasLiked);
+        setLikes((n) => wasLiked ? n + 1 : Math.max(0, n - 1));
+      }
+    } catch {
+      setIsLiked(wasLiked);
+      setLikes((n) => wasLiked ? n + 1 : Math.max(0, n - 1));
+    }
+  };
 
   const handleSave = async () => {
-    if (!user) {
-      setPendingAction({ type: "save", artworkId: id });
-      setAuthModalOpen(true);
-      return;
+    if (!user) { setPendingAction({ type: "save", artworkId: id }); setAuthModalOpen(true); return; }
+    const wasSaved = isSaved;
+    setIsSaved(!wasSaved);
+    try {
+      const res = await fetch(`/api/artworks/${id}?action=save`, { method: "POST", credentials: "include" });
+      const data = await res.json();
+      if (res.ok) setIsSaved(data.saved); else setIsSaved(wasSaved);
+    } catch {
+      setIsSaved(wasSaved);
     }
-    const res = await fetch(`${APP_BASE}/api/artworks/${id}/save`, {
-      method: "POST",
-      credentials: "include",
-    });
-    const data = await res.json();
-    setIsSaved(data.saved);
   };
 
-  const handle3D = () => {
-    if (!artwork?.has3D || !artwork.arWebId) return;
-    window.open(buildArExperienceUrl(artwork.arWebId), "_blank");
-  };
-
-  if (!artwork) {
-    return (
-      <div className="flex items-center justify-center h-dvh bg-background">
-        <p className="text-muted">Artwork not found.</p>
-      </div>
-    );
-  }
+  if (notFound) return <div className="flex items-center justify-center h-dvh"><p className="text-muted">Artwork not found.</p></div>;
+  if (!artwork) return <div className="flex items-center justify-center h-dvh"><div className="w-10 h-10 rounded-full border-2 border-primary border-t-transparent animate-spin" /></div>;
 
   const categoryLabel = artwork.categories.join(" · ").toUpperCase();
+
+  const BackBtn = ({ mobile }: { mobile?: boolean }) => (
+    <button onClick={() => router.back()} aria-label="Go back"
+      className={mobile ? "lg:hidden absolute top-4 left-4 w-9 h-9 rounded-full flex items-center justify-center" : "flex items-center gap-2 text-muted text-sm font-medium hover:text-text transition-colors"}
+      style={mobile ? { background: "rgba(255,255,255,0.2)", backdropFilter: "blur(8px)" } : undefined}>
+      <svg width={mobile ? 18 : 16} height={mobile ? 18 : 16} viewBox="0 0 24 24" fill="none" stroke={mobile ? "white" : "currentColor"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="15 18 9 12 15 6" />
+      </svg>
+      {!mobile && "Back"}
+    </button>
+  );
+
+  const SaveBtn = ({ mobile }: { mobile?: boolean }) => (
+    <button onClick={handleSave} aria-label={isSaved ? "Remove bookmark" : "Save artwork"}
+      className={mobile ? "w-9 h-9 rounded-full flex items-center justify-center" : "w-9 h-9 rounded-full flex items-center justify-center border border-border bg-surface hover:bg-border transition-colors"}
+      style={mobile ? { background: "rgba(255,255,255,0.2)", backdropFilter: "blur(8px)" } : undefined}>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill={isSaved ? (mobile ? "white" : "currentColor") : "none"} stroke={mobile ? "white" : "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mobile ? "" : "text-text"}>
+        <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
+      </svg>
+    </button>
+  );
+
+  const ShareBtn = ({ mobile }: { mobile?: boolean }) => (
+    <button onClick={() => navigator.share?.({ title: artwork.title, url: window.location.href })} aria-label="Share"
+      className={mobile ? "w-9 h-9 rounded-full flex items-center justify-center" : "w-9 h-9 rounded-full flex items-center justify-center border border-border bg-surface hover:bg-border transition-colors"}
+      style={mobile ? { background: "rgba(255,255,255,0.2)", backdropFilter: "blur(8px)" } : undefined}>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={mobile ? "white" : "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mobile ? "" : "text-text"}>
+        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><polyline points="16 6 12 2 8 6" /><line x1="12" y1="2" x2="12" y2="15" />
+      </svg>
+    </button>
+  );
 
   return (
     <div className="flex flex-col min-h-dvh bg-background lg:pl-50 lg:h-dvh lg:overflow-hidden">
 
-      {/* ── Header desktop ── */}
       <div className="hidden lg:flex items-center justify-between px-8 h-14 shrink-0 border-b border-border bg-background">
-        <button
-          onClick={() => router.back()}
-          className="flex items-center gap-2 text-muted text-sm font-medium hover:text-text transition-colors"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-          Back
-        </button>
-        <div className="flex gap-2">
-          <button
-            onClick={handleSave}
-            className="w-9 h-9 rounded-full flex items-center justify-center border border-border bg-surface hover:bg-border transition-colors"
-            aria-label={isSaved ? "Remove bookmark" : "Save artwork"}
-          >
-            <svg width="17" height="17" viewBox="0 0 24 24"
-              fill={isSaved ? "currentColor" : "none"} stroke="currentColor"
-              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-text">
-              <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
-            </svg>
-          </button>
-          <button
-            onClick={() => navigator.share?.({ title: artwork.title, url: window.location.href })}
-            className="w-9 h-9 rounded-full flex items-center justify-center border border-border bg-surface hover:bg-border transition-colors"
-            aria-label="Share"
-          >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-text">
-              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-              <polyline points="16 6 12 2 8 6" />
-              <line x1="12" y1="2" x2="12" y2="15" />
-            </svg>
-          </button>
-        </div>
+        <BackBtn />
+        <div className="flex gap-2"><SaveBtn /><ShareBtn /></div>
       </div>
 
-      {/* ── Content ── */}
       <div className="flex flex-col flex-1 min-h-0 lg:flex-row lg:overflow-hidden">
 
-        {/* ── Hero image ── */}
-        <div className="relative shrink-0 h-[55dvh] lg:h-full lg:w-1/2 lg:shrink-0">
+        <div className="relative shrink-0 h-[55dvh] lg:h-full lg:w-1/2 bg-surface">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={artwork.imageUrl}
-            alt={artwork.title}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-          <div
-            className="absolute inset-x-0 top-0 h-24"
-            style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 100%)" }}
-          />
-
-          {/* Back — mobile */}
-          <button
-            onClick={() => router.back()}
-            className="lg:hidden absolute top-4 left-4 w-9 h-9 rounded-full flex items-center justify-center"
-            style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(8px)" }}
-            aria-label="Go back"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
-
-          {/* Bookmark + Share — mobile */}
-          <div className="lg:hidden absolute top-4 right-4 flex gap-2">
-            <button
-              onClick={handleSave}
-              className="w-9 h-9 rounded-full flex items-center justify-center"
-              style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(8px)" }}
-              aria-label={isSaved ? "Remove bookmark" : "Save artwork"}
-            >
-              <svg width="17" height="17" viewBox="0 0 24 24"
-                fill={isSaved ? "white" : "none"} stroke="white"
-                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
-              </svg>
-            </button>
-            <button
-              onClick={() => navigator.share?.({ title: artwork.title, url: window.location.href })}
-              className="w-9 h-9 rounded-full flex items-center justify-center"
-              style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(8px)" }}
-              aria-label="Share"
-            >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                <polyline points="16 6 12 2 8 6" />
-                <line x1="12" y1="2" x2="12" y2="15" />
-              </svg>
-            </button>
-          </div>
+          <img src={artwork.imageUrl} alt={artwork.title} className="absolute inset-0 w-full h-full object-cover" decoding="async" fetchPriority="high" />
+          <div className="absolute inset-x-0 top-0 h-24" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 100%)" }} />
+          <BackBtn mobile />
+          <div className="lg:hidden absolute top-4 right-4 flex gap-2"><SaveBtn mobile /><ShareBtn mobile /></div>
         </div>
 
-        {/* ── Detail panel ── */}
-        <div className="flex-1 px-5 pt-5 pb-32 relative lg:w-1/2 lg:overflow-y-auto lg:pb-10 lg:pt-8 lg:px-10">
+        <div className="flex-1 px-5 pt-5 pb-32 lg:w-1/2 lg:overflow-y-auto lg:pb-10 lg:pt-8 lg:px-10">
           <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#810B38", fontFamily: "var(--font-serif)" }}>
             {artwork.year} · {categoryLabel}
           </p>
@@ -176,19 +137,16 @@ export default function ArtworkDetailPage() {
             {artwork.title}
           </h1>
           <p className="text-muted text-sm mb-4">
-            <span className="font-medium" style={{ color: "#1A1A1A" }}>{artwork.artistName}</span>
+            <span className="font-medium text-text">{artwork.artistName}</span>
             {artwork.museum && <span> · {artwork.museum}{artwork.location ? `, ${artwork.location}` : ""}</span>}
           </p>
 
           {artwork.has3D && artwork.arWebId && (
-            <button
-              onClick={handle3D}
-              className="flex items-center justify-center gap-2 w-full py-3.5 bg-text text-surface rounded-full font-semibold text-sm mb-5 active:scale-95 transition-transform"
-            >
+            <button onClick={() => window.open(buildArExperienceUrl(artwork.arWebId!), "_blank", "noopener,noreferrer")}
+              className="flex items-center justify-center gap-2 w-full py-3.5 bg-text text-surface rounded-full font-semibold text-sm mb-5 active:scale-95 transition-transform">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                <line x1="12" y1="22.08" x2="12" y2="12" />
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" />
               </svg>
               View in 3D
             </button>
@@ -210,7 +168,14 @@ export default function ArtworkDetailPage() {
           </div>
 
           <div className="mb-5">
-            <LikeButton artworkId={id} showCount />
+            <button onClick={handleLike} className="flex items-center gap-2 select-none active:scale-95 transition-transform" aria-label={isLiked ? "Unlike" : "Like"}>
+              <svg width="26" height="26" viewBox="0 0 24 24"
+                fill={isLiked ? "#810B38" : "none"} stroke={isLiked ? "#810B38" : "#6B4A36"}
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "fill 0.2s, stroke 0.2s" }}>
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+              <span className="text-sm font-medium text-muted">{likes.toLocaleString()}</span>
+            </button>
           </div>
 
           {artwork.description && (
@@ -221,13 +186,6 @@ export default function ArtworkDetailPage() {
           )}
         </div>
       </div>
-
-      <button
-        className="fixed bottom-24 right-5 w-10 h-10 rounded-full bg-surface border border-border shadow-md flex items-center justify-center text-muted text-sm font-medium z-10 lg:bottom-8"
-        aria-label="Information"
-      >
-        ?
-      </button>
 
       <BottomNav />
       <AuthModal />

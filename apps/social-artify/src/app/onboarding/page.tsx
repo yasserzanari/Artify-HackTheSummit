@@ -1,45 +1,37 @@
 "use client";
-
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
-import { useAuthStore } from "@/store/authStore";
-import { APP_BASE } from "@/lib/api";
+import { useAuth, useAuthStore } from "@/store/auth";
 import AuthModal from "@/components/auth/AuthModal";
 
-const SOCIAL_HERO_URL = `${APP_BASE}/images/artify-social-hero.png`;
+const BG_IMAGE = "/images/BackgroundImage.webp";
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { browseAsGuest, isLoggedIn } = useAuth();
+  const { browseAsGuest, isLoggedIn, quizDone } = useAuth();
   const openAuthModal = useAuthStore((s) => s.openAuthModal);
 
   useEffect(() => {
-    if (isLoggedIn) router.push("/discover");
-  }, [isLoggedIn, router]);
+    if (isLoggedIn) router.push(quizDone ? "/discover" : "/quiz");
+  }, [isLoggedIn, router, quizDone]);
 
   const handleGuest = () => {
     browseAsGuest();
-    router.push("/discover");
+    router.push(quizDone ? "/discover" : "/quiz");
   };
 
   return (
     <div className="relative flex h-dvh overflow-hidden">
+
       <div className="relative flex flex-col w-full lg:w-1/2 bg-background">
+
         <div
           className="absolute inset-0 lg:hidden"
-          style={{
-            backgroundImage: `url(${SOCIAL_HERO_URL})`,
-            backgroundSize: "cover",
-            backgroundPosition: "62% center",
-          }}
+          style={{ backgroundImage: `url(${BG_IMAGE})`, backgroundSize: "cover", backgroundPosition: "center top" }}
         />
         <div
           className="absolute inset-0 lg:hidden"
-          style={{
-            background:
-              "linear-gradient(to bottom, rgba(21,18,15,0.12) 0%, rgba(21,18,15,0.46) 48%, rgba(21,18,15,0.92) 100%)",
-          }}
+          style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.9) 100%)" }}
         />
 
         <div
@@ -47,10 +39,7 @@ export default function OnboardingPage() {
           style={{ paddingBottom: "max(40px, calc(env(safe-area-inset-bottom, 0px) + 40px))" }}
         >
           <div className="lg:mb-12">
-            <span
-              className="text-xl font-bold text-white lg:text-text"
-              style={{ fontFamily: "var(--font-serif)" }}
-            >
+            <span className="text-xl font-bold text-white lg:text-text" style={{ fontFamily: "var(--font-serif)" }}>
               Artify<span className="text-primary">.</span>
             </span>
           </div>
@@ -58,25 +47,24 @@ export default function OnboardingPage() {
           <div className="flex-1 lg:hidden" />
 
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-widest mb-5 text-white/65 lg:text-muted">
+            <p className="text-[11px] font-semibold uppercase tracking-widest mb-5 text-white/60 lg:text-muted">
               ART DISCOVERY, MADE SOCIAL
             </p>
+
             <h1
               className="font-bold leading-[1.08] mb-5 text-white lg:text-text"
               style={{
                 fontFamily: "var(--font-serif)",
                 fontSize: "clamp(2.4rem, 5vw, 3.5rem)",
-                fontStyle: "italic",
-                letterSpacing: 0,
+                letterSpacing: "-0.01em",
               }}
             >
-              Discover art
-              <br />
+              Discover art<br />
               with people.
             </h1>
-            <p className="text-sm leading-relaxed mb-8 text-white/72 lg:text-muted">
-              Like, save, and explore artworks from anywhere.
-              <br />
+
+            <p className="text-sm leading-relaxed mb-8 text-white/65 lg:text-muted">
+              Like, save, and explore artworks from anywhere.<br />
               Then open AR when a piece is ready.
             </p>
 
@@ -87,31 +75,18 @@ export default function OnboardingPage() {
               Get started
             </button>
 
-            <p className="text-sm text-center mb-4 text-white/70 lg:text-muted">
+            <p className="text-sm text-center mb-4 text-white/65 lg:text-muted">
               Already have an account?{" "}
-              <button
-                onClick={() => openAuthModal("login")}
-                className="font-semibold underline underline-offset-2 text-white lg:text-primary"
-              >
+              <button onClick={() => openAuthModal("login")} className="font-semibold underline underline-offset-2 text-white lg:text-primary">
                 Sign in
               </button>
             </p>
 
             <button
               onClick={handleGuest}
-              className="flex items-center justify-center w-full py-3.5 rounded-full text-sm font-medium border transition-all active:scale-95 border-white/40 text-white/76 hover:border-white/70 hover:text-white lg:border-border lg:text-muted lg:hover:bg-surface lg:hover:text-text lg:hover:border-border"
+              className="flex items-center justify-center w-full py-3.5 rounded-full text-sm font-medium border transition-all active:scale-95 border-white/40 text-white/70 hover:border-white/70 hover:text-white lg:border-border lg:text-muted lg:hover:bg-surface lg:hover:text-text lg:hover:border-border"
             >
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="mr-2 opacity-70"
-              >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 opacity-70">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
@@ -123,12 +98,7 @@ export default function OnboardingPage() {
 
       <div
         className="hidden lg:block lg:w-1/2 shrink-0"
-        style={{
-          backgroundImage:
-            `linear-gradient(90deg, rgba(241,226,209,0.18), rgba(241,226,209,0)), url(${SOCIAL_HERO_URL})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
+        style={{ backgroundImage: `url(${BG_IMAGE})`, backgroundSize: "cover", backgroundPosition: "center top" }}
       />
 
       <AuthModal />

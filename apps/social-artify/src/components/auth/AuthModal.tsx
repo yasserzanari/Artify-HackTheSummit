@@ -1,9 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/hooks/useAuth";
-import { useAuthStore } from "@/store/authStore";
-import { useLike } from "@/hooks/useLike";
+import { useAuth, useAuthStore } from "@/store/auth";
+import { useLike } from "@/store/feed";
 
 export default function AuthModal() {
   const { authModalOpen, setAuthModalOpen, login, register, pendingAction, setPendingAction } = useAuth();

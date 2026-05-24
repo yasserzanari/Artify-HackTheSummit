@@ -13,8 +13,7 @@ export default function TopBar({ onFilterClick, pageTitle = "Discover" }: TopBar
         className="text-xl font-bold text-text lg:hidden"
         style={{ fontFamily: "var(--font-serif)" }}
       >
-        Artify
-        <span className="text-primary">.</span>
+        Artify<span className="text-primary">.</span>
       </span>
 
       {/* Titre de page — desktop seulement */}

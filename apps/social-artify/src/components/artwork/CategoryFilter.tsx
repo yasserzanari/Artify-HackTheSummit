@@ -1,7 +1,7 @@
 "use client";
-import { useFeedStore } from "@/store/feedStore";
+import { useFeedStore } from "@/store/feed";
 
-const CATEGORIES = ["All", "Baroque", "Renaissance", "Portraits", "Modern", "New 3D"];
+const CATEGORIES = ["All", "Baroque", "Renaissance", "Portraits", "Moderne", "New 3D"];
 
 export default function CategoryFilter() {
   const activeCategory = useFeedStore((s) => s.activeCategory);

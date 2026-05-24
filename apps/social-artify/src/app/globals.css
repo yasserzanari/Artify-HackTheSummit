@@ -8,8 +8,10 @@
   --color-muted: #6B4A36;
   --color-border: #C2A07A;
 
-  --font-sans: "ITC Avant Garde Gothic", "Avant Garde Gothic", var(--font-avant-garde), "Century Gothic", Futura, sans-serif;
-  --font-serif: "Cooper BT", "Cooper", var(--font-cooper), Georgia, serif;
+  /* Body — Inter (modern, readable) */
+  --font-sans: var(--font-sans-var), Inter, system-ui, -apple-system, sans-serif;
+  /* Display / headings — Playfair Display (editorial serif) */
+  --font-serif: var(--font-serif-var), "Playfair Display", Georgia, serif;
 
   --radius-card: 12px;
   --radius-pill: 9999px;
@@ -38,4 +40,18 @@ body {
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ── Global background Ken Burns animation ── */
+@keyframes kenBurns {
+  0%   { transform: scale(1.08) translate(0%, 0%); }
+  25%  { transform: scale(1.12) translate(-1.5%, -1%); }
+  50%  { transform: scale(1.10) translate(1%, 1.5%); }
+  75%  { transform: scale(1.13) translate(-1%, 1%); }
+  100% { transform: scale(1.08) translate(0%, 0%); }
+}
+
+@keyframes bgFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 0.09; }
 }
