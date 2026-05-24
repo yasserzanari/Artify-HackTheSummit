@@ -1,5 +1,5 @@
 "use client";
-import { useFeedStore } from "@/store/feedStore";
+import { useFeedStore } from "@/store/feed";
 
 const CATEGORIES = ["All", "Baroque", "Renaissance", "Portraits", "New 3D"];
 
