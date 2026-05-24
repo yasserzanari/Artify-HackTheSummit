@@ -30,20 +30,22 @@ export const useFeedStore = create<FeedStore>((set) => ({
 
   likeArtwork: (artworkId, userId) =>
     set((s) => ({
-      artworks: s.artworks.map((a) =>
-        a.id === artworkId
-          ? { ...a, likes: a.likes + 1, likedBy: [...(a.likedBy ?? []), userId], isLikedByMe: true }
-          : a
-      ),
+      artworks: s.artworks.map((a) => {
+        if (a.id !== artworkId) return a;
+        const likedBy = a.likedBy ?? [];
+        if (likedBy.includes(userId)) return a;
+        return { ...a, likes: a.likes + 1, likedBy: [...likedBy, userId], isLikedByMe: true };
+      }),
     })),
 
   unlikeArtwork: (artworkId, userId) =>
     set((s) => ({
-      artworks: s.artworks.map((a) =>
-        a.id === artworkId
-          ? { ...a, likes: Math.max(0, a.likes - 1), likedBy: (a.likedBy ?? []).filter((id) => id !== userId), isLikedByMe: false }
-          : a
-      ),
+      artworks: s.artworks.map((a) => {
+        if (a.id !== artworkId) return a;
+        const likedBy = a.likedBy ?? [];
+        if (!likedBy.includes(userId)) return a;
+        return { ...a, likes: Math.max(0, a.likes - 1), likedBy: likedBy.filter((id) => id !== userId), isLikedByMe: false };
+      }),
     })),
 }));
 

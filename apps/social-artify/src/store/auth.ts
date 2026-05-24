@@ -37,7 +37,7 @@ export const useAuthStore = create<AuthStore>()(
       authModalTab: "login",
       sessionChecked: false, // true once the JWT cookie has been validated on mount
       setUser: (user) => set({ user, isGuest: false, pendingAction: null, authModalOpen: false }),
-      clearAuth: () => set({ user: null, isGuest: false, pendingAction: null, sessionChecked: false }),
+      clearAuth: () => set({ user: null, isGuest: false, pendingAction: null }),
       setGuest: (val) => set({ isGuest: val }),
       setQuizDone: () => set({ quizDone: true }),
       setPendingAction: (action) => set({ pendingAction: action }),
@@ -67,7 +67,7 @@ export function useAuth() {
     if (!user) return;
     fetch("/api/auth/me", { credentials: "include" })
       .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((data) => { if (data?.user) setUser(data.user); })
+      .then((data) => { if (data?.user) setUser(data.user); else clearAuth(); })
       .catch(() => clearAuth());
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

@@ -1,5 +1,5 @@
 "use client";
-import { use, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore, useAuth } from "@/store/auth";
 import { useFeedStore } from "@/store/feed";
@@ -8,8 +8,8 @@ import BottomNav from "@/components/layout/BottomNav";
 import AuthModal from "@/components/auth/AuthModal";
 import type { Artwork } from "@/types";
 
-export default function ArtworkDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function ArtworkDetailPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const router = useRouter();
 
   const [artwork, setArtwork] = useState<Artwork | null>(null);
@@ -142,7 +142,7 @@ export default function ArtworkDetailPage({ params }: { params: Promise<{ id: st
           </p>
 
           {artwork.has3D && artwork.arWebId && (
-            <button onClick={() => window.open(buildArExperienceUrl(artwork.arWebId!), "_blank")}
+            <button onClick={() => window.open(buildArExperienceUrl(artwork.arWebId!), "_blank", "noopener,noreferrer")}
               className="flex items-center justify-center gap-2 w-full py-3.5 bg-text text-surface rounded-full font-semibold text-sm mb-5 active:scale-95 transition-transform">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />

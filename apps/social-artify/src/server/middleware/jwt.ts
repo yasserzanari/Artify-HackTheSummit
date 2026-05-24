@@ -1,9 +1,13 @@
 import { SignJWT, jwtVerify } from "jose";
 import { NextRequest } from "next/server";
 
-const SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET ?? "dev-secret-change-in-prod"
-);
+const COOKIE_NAME = "artify_social_token";
+
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret && process.env.NODE_ENV === "production") {
+  throw new Error("JWT_SECRET environment variable must be set in production");
+}
+const SECRET = new TextEncoder().encode(jwtSecret ?? "dev-secret-change-in-prod");
 
 export interface TokenPayload {
   userId: string;
@@ -18,7 +22,7 @@ export async function signToken(userId: string, role: string): Promise<string> {
 }
 
 export async function verifyToken(req: NextRequest): Promise<TokenPayload | null> {
-  const token = req.cookies.get("token")?.value;
+  const token = req.cookies.get(COOKIE_NAME)?.value;
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, SECRET);
@@ -30,7 +34,8 @@ export async function verifyToken(req: NextRequest): Promise<TokenPayload | null
 
 export const COOKIE_OPTIONS = {
   httpOnly: true, // JS can't read this cookie — protects against XSS token theft
-  path: "/",
+  path: "/social",
   maxAge: 60 * 60 * 24 * 7,
   secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
 } as const;

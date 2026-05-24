@@ -62,6 +62,9 @@ AGENTS.md
 certificates/
 apps/*/certificates/
 
+# Local Claude/AI tool settings — machine-specific, not for version control
+.claude/settings.local.json
+
 # GCP service account keys — NEVER commit these
 *-service-account*.json
 *service_account*.json

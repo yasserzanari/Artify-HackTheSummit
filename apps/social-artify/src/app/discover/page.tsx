@@ -53,12 +53,14 @@ export default function DiscoverPage() {
         setAuthModalOpen(true);
         return;
       }
-      likeArtwork(artwork.id, user.id);
+      const currentArtwork = useFeedStore.getState().artworks.find((a) => a.id === artwork.id) ?? artwork;
+      const wasLiked = currentArtwork.isLikedByMe ?? false;
+      wasLiked ? unlikeArtwork(artwork.id, user.id) : likeArtwork(artwork.id, user.id);
       try {
         const res = await fetch(`/api/artworks/${artwork.id}?action=like`, { method: "POST", credentials: "include" });
-        if (!res.ok) unlikeArtwork(artwork.id, user.id);
+        if (!res.ok) wasLiked ? likeArtwork(artwork.id, user.id) : unlikeArtwork(artwork.id, user.id);
       } catch {
-        unlikeArtwork(artwork.id, user.id);
+        wasLiked ? likeArtwork(artwork.id, user.id) : unlikeArtwork(artwork.id, user.id);
       }
     },
     [user, likeArtwork, unlikeArtwork, setPendingAction, setAuthModalOpen]

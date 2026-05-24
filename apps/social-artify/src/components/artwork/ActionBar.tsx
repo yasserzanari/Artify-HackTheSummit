@@ -20,7 +20,7 @@ export default function ActionBar({ artwork, onPass, onLike }: ActionBarProps) {
 
   const handle3D = () => {
     if (!artwork?.has3D || !artwork.arWebId) return;
-    window.open(buildArExperienceUrl(artwork.arWebId), "_blank");
+    window.open(buildArExperienceUrl(artwork.arWebId), "_blank", "noopener,noreferrer");
   };
 
   return (

@@ -28,8 +28,8 @@ export interface Artwork {
   arWebId?: string;
   description?: string;
   likes: number;
-  likedBy: string[];
-  savedBy: string[];
+  likedBy?: string[];
+  savedBy?: string[];
   isLikedByMe?: boolean;
   isSavedByMe?: boolean;
   createdAt: string;
