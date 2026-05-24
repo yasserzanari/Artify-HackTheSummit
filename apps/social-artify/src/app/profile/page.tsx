@@ -1,219 +1,207 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
-import { useAuthStore } from "@/store/authStore";
-import { useFeedStore } from "@/store/feedStore";
+import Link from "next/link";
+import { useAuth, useAuthStore } from "@/store/auth";
 import BottomNav from "@/components/layout/BottomNav";
 import AuthModal from "@/components/auth/AuthModal";
-import type { ArtProfile } from "@/lib/types";
-
-const PROFILE_META: Record<ArtProfile, { name: string; icon: string }> = {
-  renaissance: { name: "Renaissance",  icon: "architecture" },
-  moderne:     { name: "Moderne",       icon: "brush" },
-  abstrait:    { name: "Abstrait",      icon: "auto_awesome" },
-  surrealisme: { name: "Surréalisme",   icon: "psychology" },
-};
+import type { Artwork } from "@/types";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, isLoggedIn, logout, isGuest } = useAuth();
-  const openAuthModal = useAuthStore((s) => s.openAuthModal);
-  const setShowQuiz = useAuthStore((s) => s.setShowQuiz);
-  const artworks = useFeedStore((s) => s.artworks);
+  const { user, isLoggedIn, sessionChecked, logout } = useAuth();
+  const setUser = useAuthStore((s) => s.setUser);
 
-  // Si pas connecté et pas guest → onboarding
+  const [likedArtworks, setLikedArtworks] = useState<Artwork[]>([]);
+  const [savedCount, setSavedCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
   useEffect(() => {
-    if (!isLoggedIn && !isGuest) {
-      router.push("/onboarding");
-    }
-  }, [isLoggedIn, isGuest, router]);
+    if (!sessionChecked) return;
+    if (!isLoggedIn) router.replace("/onboarding");
+  }, [sessionChecked, isLoggedIn, router]);
 
-  const handleLogout = () => {
-    logout();
-    router.push("/onboarding");
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    setLoading(true);
+    fetch("/api/artworks", { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => {
+        const all: Artwork[] = data.artworks ?? [];
+        setLikedArtworks(all.filter((a) => a.isLikedByMe));
+        setSavedCount(all.filter((a) => a.isSavedByMe).length);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [isLoggedIn]);
+
+  const openEdit = () => {
+    setName(user!.name);
+    setEmail(user!.email);
+    setPassword("");
+    setError("");
+    setEditing(true);
   };
 
-  const likedCount = user
-    ? artworks.filter((a) => a.likedBy.includes(user.id)).length
-    : 0;
-  const savedCount = user
-    ? artworks.filter((a) => a.savedBy.includes(user.id)).length
-    : 0;
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    try {
+      const res = await fetch("/api/auth/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          name: name.trim() || undefined,
+          email: email.trim() || undefined,
+          password: password || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setUser(data.user);
+      setEditing(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Update failed");
+    } finally {
+      setSaving(false);
+    }
+  };
 
-  const roleLabel =
-    user?.role === "artist" ? "Artist" : user?.role === "viewer" ? "Art Lover" : "Guest";
+  if (!sessionChecked || !isLoggedIn) return null;
+
+  const initials = user!.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  const inputCls = "w-full px-4 py-3 rounded-xl border border-border bg-background text-text text-sm outline-none focus:border-primary transition-colors";
 
   return (
-    <div className="flex flex-col min-h-dvh lg:pl-50">
-      {/* ── Header ── */}
-      <header className="flex items-center justify-between h-14 px-5 bg-background border-b border-border shrink-0">
-        <span
-          className="text-xl font-bold text-text lg:hidden"
-          style={{ fontFamily: "var(--font-serif)" }}
-        >
-          Artify<span className="text-primary">.</span>
-        </span>
-        <span className="hidden lg:block text-sm font-semibold uppercase tracking-widest text-muted">
-          Profile
-        </span>
-        <div />
-      </header>
+    <div className="flex flex-col min-h-dvh bg-background lg:pl-50">
 
-      <div className="flex-1 px-5 pt-10 pb-32 max-w-lg mx-auto w-full">
-        {isLoggedIn && user ? (
-          <>
-            {/* ── Avatar initiales + infos ── */}
-            <div className="flex flex-col items-center text-center mb-8">
-              <div
-                className="w-20 h-20 rounded-full flex items-center justify-center mb-4 text-white text-2xl font-bold select-none"
-                style={{ backgroundColor: "#810B38" }}
-              >
-                {user.name.charAt(0).toUpperCase()}
-              </div>
-              <h1
-                className="text-2xl font-bold text-text mb-1"
-                style={{ fontFamily: "var(--font-serif)" }}
-              >
-                {user.name}
-              </h1>
-              <p className="text-muted text-sm mb-3">{user.email}</p>
-              <span
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
-                style={{ backgroundColor: "#F3E1E8", color: "#810B38" }}
-              >
-                <span className="material-icons" style={{ fontSize: "14px" }}>
-                  {user.role === "artist" ? "draw" : "palette"}
-                </span>
-                {roleLabel}
-              </span>
-            </div>
+      <div className="px-5 pt-10 pb-6 lg:px-10 lg:pt-12">
 
-            {/* ── Profil artistique ── */}
-            {user.artProfile ? (
-              <div className="bg-surface rounded-2xl px-5 py-4 mb-6 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-                    style={{ backgroundColor: "#F3E1E8" }}
-                  >
-                    <span className="material-icons" style={{ fontSize: "18px", color: "#810B38" }}>
-                      {PROFILE_META[user.artProfile].icon}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted">
-                      Profil artistique
-                    </p>
-                    <p className="text-sm font-bold text-text" style={{ fontFamily: "var(--font-serif)" }}>
-                      {PROFILE_META[user.artProfile].name}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowQuiz(true)}
-                  className="text-xs font-semibold text-primary underline underline-offset-2 active:opacity-70"
-                >
-                  Refaire
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowQuiz(true)}
-                className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl border-2 border-dashed border-border text-muted text-sm font-medium mb-6 active:scale-95 transition-transform"
-              >
-                <span className="material-icons" style={{ fontSize: "18px" }}>quiz</span>
-                Découvrir mon profil artistique
-              </button>
-            )}
-
-            {/* ── Stats ── */}
-            <div className="flex gap-3 mb-6">
-              <div className="flex-1 bg-surface rounded-2xl px-4 py-5 text-center">
-                <p
-                  className="text-3xl font-bold text-text"
-                  style={{ fontFamily: "var(--font-serif)" }}
-                >
-                  {likedCount}
-                </p>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted mt-1">
-                  Liked
-                </p>
-              </div>
-              <div className="flex-1 bg-surface rounded-2xl px-4 py-5 text-center">
-                <p
-                  className="text-3xl font-bold text-text"
-                  style={{ fontFamily: "var(--font-serif)" }}
-                >
-                  {savedCount}
-                </p>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted mt-1">
-                  Saved
-                </p>
-              </div>
-            </div>
-
-            {/* ── Member since ── */}
-            <div className="bg-surface rounded-2xl px-5 py-4 mb-8">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted mb-1">
-                Member since
-              </p>
-              <p className="text-sm text-text font-medium">
-                {new Date(user.createdAt).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </p>
-            </div>
-
-            {/* ── Logout ── */}
-            <button
-              onClick={handleLogout}
-              className="flex items-center justify-center gap-2 w-full py-4 rounded-full border-2 border-border text-muted font-semibold text-sm hover:border-primary hover:text-primary transition-colors active:scale-95"
-            >
-              <span className="material-icons" style={{ fontSize: "18px" }}>
-                logout
-              </span>
-              Log out
-            </button>
-          </>
-        ) : (
-          /* ── Guest : invitation à créer un compte ── */
-          <div className="flex flex-col items-center text-center pt-12">
-            <span
-              className="material-icons mb-4"
-              style={{ fontSize: "4.5rem", color: "var(--color-border)" }}
-            >
-              account_circle
-            </span>
-            <h1
-              className="text-2xl font-bold text-text mb-2"
-              style={{ fontFamily: "var(--font-serif)" }}
-            >
-              You&apos;re browsing as a guest
+        <div className="flex items-center gap-4 mb-6">
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold text-white shrink-0"
+            style={{ backgroundColor: "#810B38", fontFamily: "var(--font-serif)" }}
+          >
+            {initials}
+          </div>
+          <div>
+            <h1 className="text-text font-bold text-xl leading-tight" style={{ fontFamily: "var(--font-serif)" }}>
+              {user!.name}
             </h1>
-            <p className="text-muted text-sm mb-8 leading-relaxed max-w-xs">
-              Create an account to like and save artworks,
-              and keep track of your collection.
-            </p>
-            <button
-              onClick={() => openAuthModal("register")}
-              className="flex items-center justify-center w-full py-4 bg-primary text-white rounded-full font-semibold text-base mb-3 active:scale-95 transition-transform"
+            <span
+              className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
+              style={{
+                backgroundColor: user!.role === "artist" ? "#F3E1E8" : "#DCC3AA",
+                color: user!.role === "artist" ? "#810B38" : "#6B4A36",
+              }}
             >
-              Get started
-            </button>
-            <button
-              onClick={() => openAuthModal("login")}
-              className="flex items-center justify-center w-full py-3.5 rounded-full border border-border text-muted font-medium text-sm active:scale-95 transition-transform"
-            >
-              Already have an account? Sign in
-            </button>
+              {user!.role === "artist" ? "Artist" : "Art Lover"}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex gap-8 mb-6">
+          <div>
+            <p className="text-xl font-bold text-text">{likedArtworks.length}</p>
+            <p className="text-xs text-muted uppercase tracking-wider font-medium">Liked</p>
+          </div>
+          <div className="w-px bg-border" />
+          <div>
+            <p className="text-xl font-bold text-text">{savedCount}</p>
+            <p className="text-xs text-muted uppercase tracking-wider font-medium">Saved</p>
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <Link href="/saved" className="flex-1 py-2.5 rounded-full text-sm font-semibold text-center border border-border bg-surface hover:bg-border transition-colors">
+            Saved artworks
+          </Link>
+          <button onClick={openEdit} className="px-5 py-2.5 rounded-full text-sm font-semibold border border-border bg-surface hover:bg-border transition-colors text-muted">
+            Edit
+          </button>
+          <button onClick={logout} className="px-5 py-2.5 rounded-full text-sm font-semibold border border-border bg-surface hover:bg-border transition-colors text-muted">
+            Log out
+          </button>
+        </div>
+      </div>
+
+      {editing && (
+        <div className="mx-5 mb-5 p-5 rounded-2xl border border-border bg-surface lg:mx-10">
+          <p className="text-sm font-bold text-text mb-4" style={{ fontFamily: "var(--font-serif)" }}>
+            Edit profile
+          </p>
+          <form onSubmit={handleSave} className="flex flex-col gap-3">
+            <input type="text" placeholder="Name" value={name}
+              onChange={(e) => setName(e.target.value)} className={inputCls} />
+            <input type="email" placeholder="Email" value={email}
+              onChange={(e) => setEmail(e.target.value)} className={inputCls} />
+            <input type="password" placeholder="New password (optional)" value={password}
+              onChange={(e) => setPassword(e.target.value)} className={inputCls} />
+            {error && <p className="text-primary text-xs">{error}</p>}
+            <div className="flex gap-2 pt-1">
+              <button type="submit" disabled={saving}
+                className="flex-1 py-2.5 rounded-full bg-text text-surface text-sm font-semibold disabled:opacity-50">
+                {saving ? "Saving…" : "Save"}
+              </button>
+              <button type="button" onClick={() => setEditing(false)}
+                className="flex-1 py-2.5 rounded-full border border-border text-sm font-semibold text-muted">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <div className="h-px bg-border mx-5 lg:mx-10 mb-5" />
+
+      <div className="px-5 pb-32 lg:px-10 lg:pb-10">
+        <p className="text-xs font-bold uppercase tracking-widest text-muted mb-3">Liked artworks</p>
+
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+          </div>
+        ) : likedArtworks.length === 0 ? (
+          <div className="flex flex-col items-center py-16 text-center">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#C2A07A" strokeWidth="1.5" className="mb-3">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+            <p className="text-muted text-sm">No liked artworks yet.</p>
+            <Link href="/discover" className="mt-3 text-sm font-semibold text-primary underline underline-offset-2">
+              Start discovering
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-4">
+            {likedArtworks.map((a) => (
+              <Link key={a.id} href={`/artwork/${a.id}`} className="group block aspect-square rounded-xl overflow-hidden relative bg-surface">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={a.imageUrl} alt={a.title}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  loading="lazy" decoding="async" />
+                <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)" }} />
+                <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                  <p className="text-white text-xs font-semibold leading-tight line-clamp-2" style={{ fontFamily: "var(--font-serif)" }}>{a.title}</p>
+                  <p className="text-white/60 text-[10px] mt-0.5">{a.artistName}</p>
+                </div>
+                {a.has3D && (
+                  <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full text-[9px] font-bold text-white" style={{ backgroundColor: "#810B38" }}>3D</div>
+                )}
+              </Link>
+            ))}
           </div>
         )}
       </div>
 
-      <div className="h-24 shrink-0 lg:hidden" />
       <BottomNav />
       <AuthModal />
     </div>

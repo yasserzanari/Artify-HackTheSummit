@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import ArtQuiz from "@/components/quiz/ArtQuiz";
 
 // Body — neutral, modern, ultra-readable
 const inter = Inter({
@@ -40,10 +39,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link
-          href="https://fonts.googleapis.com/icon?family=Material+Icons"
-          rel="stylesheet"
-        />
+        <link rel="preconnect" href="https://upload.wikimedia.org" />
       </head>
       <body className={`${inter.variable} ${playfairDisplay.variable}`}>
         {/* ── Global animated background ── */}
@@ -70,7 +66,6 @@ export default function RootLayout({
           />
         </div>
         {children}
-        <ArtQuiz />
       </body>
     </html>
   );

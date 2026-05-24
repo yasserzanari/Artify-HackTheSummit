@@ -25,15 +25,12 @@ export interface Artwork {
   categories: string[];
   imageUrl: string;
   has3D: boolean;
-  arWebId?: string; // matches ar-web artwork ID if has3D is true
+  arWebId?: string;
   description?: string;
   likes: number;
-  likedBy: string[]; // user IDs
-  savedBy: string[]; // user IDs
+  likedBy: string[];
+  savedBy: string[];
+  isLikedByMe?: boolean;
+  isSavedByMe?: boolean;
   createdAt: string;
-}
-
-export interface AuthState {
-  user: User | null;
-  isGuest: boolean;
 }

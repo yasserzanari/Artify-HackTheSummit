@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #F1E2D1;  /* warm cream — main page bg */
-  --color-surface: #DCC3AA;     /* warm tan — cards, panels, secondary bg */
-  --color-primary: #810B38;     /* deep burgundy — CTAs, accents, links */
-  --color-text: #1A1A1A;        /* near-black — high contrast on all bg */
-  --color-muted: #6B4A36;       /* warm dark brown — secondary text */
-  --color-border: #C2A07A;      /* mid-tan — visible on both bg & surface */
+  --color-background: #F1E2D1;
+  --color-surface: #DCC3AA;
+  --color-primary: #810B38;
+  --color-text: #1A1A1A;
+  --color-muted: #6B4A36;
+  --color-border: #C2A07A;
 
   /* Body — Inter (modern, readable) */
   --font-sans: var(--font-sans-var), Inter, system-ui, -apple-system, sans-serif;
@@ -34,8 +34,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-
-/* scrollbar hide utility */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }

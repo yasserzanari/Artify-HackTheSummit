@@ -2,11 +2,10 @@
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle, useMemo } from "react";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import type { PanInfo } from "framer-motion";
-import type { Artwork } from "@/lib/types";
+import type { Artwork } from "@/types";
 import ArtworkCard from "./ArtworkCard";
 
 export interface SwipeDeckHandle {
-  /** Advance the deck by one card without firing any like/pass callback. */
   advance: () => void;
   topArtwork: Artwork | null;
 }
@@ -16,7 +15,6 @@ interface SwipeDeckProps {
   onLike: (artwork: Artwork) => void;
   onPass: (artwork: Artwork) => void;
   onCardTap: (artwork: Artwork) => void;
-  /** Called whenever the top card changes (including swipes and resets). */
   onTopCardChange?: (artwork: Artwork | null) => void;
 }
 
@@ -37,6 +35,7 @@ function DraggableCard({ artwork, onLike, onPass, onCardTap }: DraggableCardProp
   const handleDragStart = () => { isDragging.current = true; };
 
   const handleDragEnd = async (_: unknown, info: PanInfo) => {
+    // Swipe commits if the card moved > 80px or was flicked fast enough (> 400px/s)
     const hit =
       Math.abs(info.offset.x) > 80 || Math.abs(info.velocity.x) > 400;
     if (hit) {
@@ -47,6 +46,7 @@ function DraggableCard({ artwork, onLike, onPass, onCardTap }: DraggableCardProp
     } else {
       animate(x, 0, { type: "spring", damping: 22, stiffness: 320 });
     }
+    // Delay prevents the tap handler from firing right after a drag ends
     setTimeout(() => { isDragging.current = false; }, 50);
   };
 
@@ -72,7 +72,9 @@ function DraggableCard({ artwork, onLike, onPass, onCardTap }: DraggableCardProp
           >
             <span className="flex items-center gap-1">
               LIKE
-              <span className="material-icons" style={{ fontSize: "16px", lineHeight: 1 }}>favorite</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
             </span>
           </span>
         </motion.div>
@@ -97,21 +99,18 @@ const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
   function SwipeDeck({ artworks, onLike, onPass, onCardTap, onTopCardChange }, ref) {
     const [topIndex, setTopIndex] = useState(0);
 
-    // Reset when artwork list changes (e.g. category filter)
     const artworkKey = useMemo(() => artworks.map((a) => a.id).join(","), [artworks]);
     const prevKeyRef = useRef(artworkKey);
     if (artworkKey !== prevKeyRef.current) {
       prevKeyRef.current = artworkKey;
-      // Use a layout effect–safe async update to avoid setState-in-render
+      // Defer to avoid calling setState during render
       Promise.resolve().then(() => setTopIndex(0));
     }
 
-    // Notify parent whenever the top card changes
     useEffect(() => {
       onTopCardChange?.(artworks[topIndex] ?? null);
     }, [topIndex, artworks, onTopCardChange]);
 
-    // Expose an advance() that just moves the deck forward (no callbacks)
     useImperativeHandle(ref, () => ({
       advance: () => setTopIndex((i) => i + 1),
       topArtwork: artworks[topIndex] ?? null,
@@ -138,9 +137,11 @@ const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
     if (topIndex >= artworks.length) {
       return (
         <div className="flex flex-col items-center justify-center w-full h-full gap-4 text-center px-6">
-          <span className="material-icons select-none" style={{ fontSize: "3rem", color: "var(--color-border)" }}>
-            image
-          </span>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-border)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+          </svg>
           <p className="font-bold text-lg" style={{ fontFamily: "var(--font-serif)" }}>
             You&apos;ve seen it all
           </p>
@@ -162,7 +163,7 @@ const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
     return (
       <div className="relative w-full h-full">
         {[...visible].reverse().map((artwork, revIdx) => {
-          const stackIdx = visible.length - 1 - revIdx; // 0 = top card
+          const stackIdx = visible.length - 1 - revIdx;
           const isTop = stackIdx === 0;
           const scale = 1 - stackIdx * 0.04;
           const ty = stackIdx * 12;

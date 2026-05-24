@@ -1,6 +1,6 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/store/auth";
 
 export default function GuestBanner() {
   const { isGuest, isLoggedIn, setAuthModalOpen } = useAuth();

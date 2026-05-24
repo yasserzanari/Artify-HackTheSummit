@@ -1,20 +1,18 @@
 "use client";
 import { useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useFeedStore } from "@/store/feedStore";
-import { useAuthStore } from "@/store/authStore";
-import { useAuth } from "@/hooks/useAuth";
-import { useArtworks } from "@/hooks/useArtworks";
-import type { Artwork } from "@/lib/types";
+import { useFeedStore, useArtworks } from "@/store/feed";
+import { useAuthStore, useAuth } from "@/store/auth";
+import type { Artwork } from "@/types";
 
 import TopBar from "@/components/layout/TopBar";
 import BottomNav from "@/components/layout/BottomNav";
 import CategoryFilter from "@/components/artwork/CategoryFilter";
 import SwipeDeck, { type SwipeDeckHandle } from "@/components/artwork/SwipeDeck";
-import ActionBar from "@/components/social/ActionBar";
+import ActionBar from "@/components/artwork/ActionBar";
 import GuestBanner from "@/components/auth/GuestBanner";
 import AuthModal from "@/components/auth/AuthModal";
-import type { ArtProfile } from "@/lib/types";
+import type { ArtProfile } from "@/types";
 
 const PROFILE_LABELS: Record<ArtProfile, { name: string; icon: string }> = {
   renaissance: { name: "Renaissance",  icon: "architecture" },
@@ -29,15 +27,17 @@ export default function DiscoverPage() {
 
   const activeCategory = useFeedStore((s) => s.activeCategory);
   const likeArtwork = useFeedStore((s) => s.likeArtwork);
+  const unlikeArtwork = useFeedStore((s) => s.unlikeArtwork);
   const user = useAuthStore((s) => s.user);
-  const setShowQuiz = useAuthStore((s) => s.setShowQuiz);
   const setPendingAction = useAuthStore((s) => s.setPendingAction);
   const setAuthModalOpen = useAuthStore((s) => s.setAuthModalOpen);
 
-  // Si l'user a un profil → filtrage par profil (ignore activeCategory)
-  // Sinon → filtrage par catégorie active
+  // Si l'user a un profil → show all artworks; sinon → filtre par catégorie active
   const categoryForFilter = user?.artProfile ? undefined : activeCategory;
   const { artworks: filtered } = useArtworks(categoryForFilter);
+
+  // Initialise auth depuis le cookie JWT
+  useAuth();
 
   // Track top card so ActionBar stays in sync with the deck
   const [currentArtwork, setCurrentArtwork] = useState<Artwork | null>(null);
@@ -45,47 +45,39 @@ export default function DiscoverPage() {
     setCurrentArtwork(artwork);
   }, []);
 
-  // Initialise auth from localStorage
-  useAuth();
-
   // ── Like handler (shared by swipe and ActionBar) ─────────────────────────
   const handleLike = useCallback(
-    (artwork: Artwork) => {
+    async (artwork: Artwork) => {
       if (!user) {
         setPendingAction({ type: "like", artworkId: artwork.id });
         setAuthModalOpen(true);
         return;
       }
       likeArtwork(artwork.id, user.id);
+      try {
+        const res = await fetch(`/api/artworks/${artwork.id}?action=like`, { method: "POST", credentials: "include" });
+        if (!res.ok) unlikeArtwork(artwork.id, user.id);
+      } catch {
+        unlikeArtwork(artwork.id, user.id);
+      }
     },
-    [user, likeArtwork, setPendingAction, setAuthModalOpen]
+    [user, likeArtwork, unlikeArtwork, setPendingAction, setAuthModalOpen]
   );
 
-  const handlePass = useCallback((_artwork: Artwork) => {
-    // pass needs no store update in the feed view
-  }, []);
-
+  const handlePass = useCallback((_artwork: Artwork) => {}, []);
   const handleCardTap = useCallback(
-    (artwork: Artwork) => {
-      router.push(`/artwork/${artwork.id}`);
-    },
+    (artwork: Artwork) => { router.push(`/artwork/${artwork.id}`); },
     [router]
   );
 
-  // ── ActionBar button handlers ────────────────────────────────────────────
-  const handleActionBarPass = () => {
-    deckRef.current?.advance(); // advance deck only — no pass callback
-  };
-
+  const handleActionBarPass = () => { deckRef.current?.advance(); };
   const handleActionBarLike = () => {
     const artwork = deckRef.current?.topArtwork;
     if (!artwork) return;
-    handleLike(artwork); // update store (auth-guarded)
-    if (user) deckRef.current?.advance(); // advance deck if logged in
-    // if not logged in, AuthModal opens — deck stays put until user logs in
+    handleLike(artwork);
+    if (user) deckRef.current?.advance();
   };
 
-  // Fallback for ActionBar before deck ref is ready
   const topForActionBar = currentArtwork ?? filtered[0] ?? null;
 
   return (
@@ -105,7 +97,7 @@ export default function DiscoverPage() {
             {PROFILE_LABELS[user.artProfile].name}
           </div>
           <button
-            onClick={() => setShowQuiz(true)}
+            onClick={() => router.push("/quiz")}
             className="text-[11px] font-semibold text-muted underline underline-offset-2 active:opacity-70"
           >
             Changer
@@ -119,7 +111,6 @@ export default function DiscoverPage() {
         Swipe to vote · Tap to view
       </p>
 
-      {/* Card deck — centré et contrainte à 440px sur desktop */}
       <div className="flex-1 relative px-4 pt-2 pb-1 min-h-0 lg:flex lg:items-center lg:justify-center">
         <div className="relative w-full h-full lg:max-w-110 lg:h-full">
           <SwipeDeck
@@ -133,15 +124,8 @@ export default function DiscoverPage() {
         </div>
       </div>
 
-      <ActionBar
-        artwork={topForActionBar}
-        onPass={handleActionBarPass}
-        onLike={handleActionBarLike}
-      />
-
+      <ActionBar artwork={topForActionBar} onPass={handleActionBarPass} onLike={handleActionBarLike} />
       <GuestBanner />
-
-      {/* Spacer pour le pill nav mobile — caché sur desktop (sidebar remplace) */}
       <div className="h-24 shrink-0 lg:hidden" />
       <BottomNav />
       <AuthModal />

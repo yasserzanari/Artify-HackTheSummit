@@ -1,5 +1,5 @@
 "use client";
-import { useFeedStore } from "@/store/feedStore";
+import { useFeedStore } from "@/store/feed";
 
 const CATEGORIES = ["All", "Renaissance", "Moderne", "Abstrait", "Surréalisme", "New 3D"];
 
