@@ -17,12 +17,14 @@
     "has3D": true,
     "arWebId": "mona-lisa",
     "description": "The world's most recognised painting. Leonardo's sfumato technique gives the face an unrivalled softness.",
-    "likes": 1,
+    "likes": 2,
     "likedBy": [
-      "983620b8-88e0-474d-b133-46cd706fcdd3"
+      "983620b8-88e0-474d-b133-46cd706fcdd3",
+      "617f0af6-3147-48f6-8d5d-8da8e9d6d9ed"
     ],
     "savedBy": [
-      "983620b8-88e0-474d-b133-46cd706fcdd3"
+      "983620b8-88e0-474d-b133-46cd706fcdd3",
+      "617f0af6-3147-48f6-8d5d-8da8e9d6d9ed"
     ],
     "createdAt": "2024-01-01T00:00:00.000Z"
   },
@@ -91,8 +93,10 @@
     "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/1665_Girl_with_a_Pearl_Earring.jpg/800px-1665_Girl_with_a_Pearl_Earring.jpg",
     "has3D": false,
     "description": "Often called the 'Mona Lisa of the North'. A single pearl catches the light — the sitter's identity remains art history's greatest mystery.",
-    "likes": 0,
-    "likedBy": [],
+    "likes": 1,
+    "likedBy": [
+      "617f0af6-3147-48f6-8d5d-8da8e9d6d9ed"
+    ],
     "savedBy": [],
     "createdAt": "2024-01-01T00:00:00.000Z"
   },
@@ -112,8 +116,10 @@
     "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Caravaggio_-_Judith_Beheading_Holofernes_-_WGA04167.jpg/800px-Caravaggio_-_Judith_Beheading_Holofernes_-_WGA04167.jpg",
     "has3D": false,
     "description": "Caravaggio's dramatic chiaroscuro turns a biblical scene into a visceral, almost uncomfortable confrontation.",
-    "likes": 0,
-    "likedBy": [],
+    "likes": 1,
+    "likedBy": [
+      "617f0af6-3147-48f6-8d5d-8da8e9d6d9ed"
+    ],
     "savedBy": [],
     "createdAt": "2024-01-01T00:00:00.000Z"
   }

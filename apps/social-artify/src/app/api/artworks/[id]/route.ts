@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/server/middleware/auth";
+import { verifyToken } from "@/server/middleware/jwt";
 import { getById, toggleLike, toggleSave } from "@/server/services/artwork.service";
 
 export async function GET(

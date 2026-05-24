@@ -38,7 +38,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Preconnect speeds up Wikipedia image loading */}
         <link rel="preconnect" href="https://upload.wikimedia.org" />
       </head>
       <body className={`${josefinSans.variable} ${fraunces.variable}`}>

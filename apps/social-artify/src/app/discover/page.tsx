@@ -9,7 +9,7 @@ import TopBar from "@/components/layout/TopBar";
 import BottomNav from "@/components/layout/BottomNav";
 import CategoryFilter from "@/components/artwork/CategoryFilter";
 import SwipeDeck, { type SwipeDeckHandle } from "@/components/artwork/SwipeDeck";
-import ActionBar from "@/components/social/ActionBar";
+import ActionBar from "@/components/artwork/ActionBar";
 import GuestBanner from "@/components/auth/GuestBanner";
 import AuthModal from "@/components/auth/AuthModal";
 

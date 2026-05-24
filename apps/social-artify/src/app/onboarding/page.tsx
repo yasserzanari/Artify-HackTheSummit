@@ -9,16 +9,16 @@ const MONA_LISA_URL =
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { browseAsGuest, isLoggedIn } = useAuth();
+  const { browseAsGuest, isLoggedIn, quizDone } = useAuth();
   const openAuthModal = useAuthStore((s) => s.openAuthModal);
 
   useEffect(() => {
-    if (isLoggedIn) router.push("/discover");
-  }, [isLoggedIn, router]);
+    if (isLoggedIn) router.push(quizDone ? "/discover" : "/quiz");
+  }, [isLoggedIn, router, quizDone]);
 
   const handleGuest = () => {
     browseAsGuest();
-    router.push("/discover");
+    router.push(quizDone ? "/discover" : "/quiz");
   };
 
   return (

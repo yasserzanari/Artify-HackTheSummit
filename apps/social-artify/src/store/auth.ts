@@ -10,6 +10,7 @@ type PendingAction = { type: "like" | "save"; artworkId: string };
 interface AuthStore {
   user: User | null;
   isGuest: boolean;
+  quizDone: boolean;
   pendingAction: PendingAction | null;
   authModalOpen: boolean;
   authModalTab: "login" | "register";
@@ -17,6 +18,7 @@ interface AuthStore {
   setUser: (user: User) => void;
   clearAuth: () => void;
   setGuest: (val: boolean) => void;
+  setQuizDone: () => void;
   setPendingAction: (action: PendingAction | null) => void;
   setAuthModalOpen: (open: boolean) => void;
   setAuthModalTab: (tab: "login" | "register") => void;
@@ -29,6 +31,7 @@ export const useAuthStore = create<AuthStore>()(
     (set) => ({
       user: null,
       isGuest: false,
+      quizDone: false,
       pendingAction: null,
       authModalOpen: false,
       authModalTab: "login",
@@ -36,6 +39,7 @@ export const useAuthStore = create<AuthStore>()(
       setUser: (user) => set({ user, isGuest: false, pendingAction: null, authModalOpen: false }),
       clearAuth: () => set({ user: null, isGuest: false, pendingAction: null, sessionChecked: false }),
       setGuest: (val) => set({ isGuest: val }),
+      setQuizDone: () => set({ quizDone: true }),
       setPendingAction: (action) => set({ pendingAction: action }),
       setAuthModalOpen: (open) => set({ authModalOpen: open }),
       setAuthModalTab: (tab) => set({ authModalTab: tab }),
@@ -44,16 +48,16 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: "artify-auth",
-      // Only persist identity — UI state (modals, pending actions) is never saved
-      partialize: (s) => ({ user: s.user, isGuest: s.isGuest }),
+      // Only persist identity + quiz flag — UI state (modals, pending actions) is never saved
+      partialize: (s) => ({ user: s.user, isGuest: s.isGuest, quizDone: s.quizDone }),
     }
   )
 );
 
 export function useAuth() {
   const router = useRouter();
-  const { user, isGuest, pendingAction, authModalOpen, authModalTab, sessionChecked,
-    setUser, clearAuth, setGuest, setPendingAction, setAuthModalOpen, openAuthModal, setSessionChecked,
+  const { user, isGuest, quizDone, pendingAction, authModalOpen, authModalTab, sessionChecked,
+    setUser, clearAuth, setGuest, setQuizDone, setPendingAction, setAuthModalOpen, openAuthModal, setSessionChecked,
   } = useAuthStore();
 
   // On mount: re-validate the JWT cookie so stale localStorage data doesn't linger
@@ -97,11 +101,11 @@ export function useAuth() {
   }
 
   return {
-    user, isGuest, sessionChecked, pendingAction, authModalOpen, authModalTab,
+    user, isGuest, quizDone, sessionChecked, pendingAction, authModalOpen, authModalTab,
     isLoggedIn: !!user,
     isArtist: user?.role === "artist",
     login, register, logout,
     browseAsGuest: () => setGuest(true),
-    setGuest, setPendingAction, setAuthModalOpen, openAuthModal,
+    setGuest, setQuizDone, setPendingAction, setAuthModalOpen, openAuthModal,
   };
 }

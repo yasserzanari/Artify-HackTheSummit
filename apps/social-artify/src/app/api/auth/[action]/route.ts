@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { register, login, me, updateUser } from "@/server/services/auth.service";
-import { verifyToken, COOKIE_OPTIONS } from "@/server/middleware/auth";
+import { verifyToken, COOKIE_OPTIONS } from "@/server/middleware/jwt";
 
 type Params = { params: Promise<{ action: string }> };
 

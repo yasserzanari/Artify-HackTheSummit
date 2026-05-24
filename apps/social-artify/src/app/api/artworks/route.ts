@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/server/middleware/auth";
+import { verifyToken } from "@/server/middleware/jwt";
 import { getAll } from "@/server/services/artwork.service";
 
 export async function GET(req: NextRequest) {

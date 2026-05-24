@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { db } from "@/server/db";
-import { signToken } from "@/server/middleware/auth";
+import { signToken } from "@/server/middleware/jwt";
 import type { User } from "@/types";
 
 export async function register(

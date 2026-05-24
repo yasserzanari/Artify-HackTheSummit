@@ -14,5 +14,13 @@
     "role": "artist",
     "createdAt": "2026-05-24T10:11:45.159Z",
     "password": "$2b$10$YgJfeZ82xFVKvSYT/po3Bea9U05RX4SSH6e8ezshcQ3oiUwn0jE.e"
+  },
+  {
+    "id": "617f0af6-3147-48f6-8d5d-8da8e9d6d9ed",
+    "name": "Mario",
+    "email": "mario@email.com",
+    "role": "viewer",
+    "createdAt": "2026-05-24T11:31:59.121Z",
+    "password": "$2b$10$z3Xe7IrcU/dPB7DpMtz0OeM1vE7PO0GgjZ8XhN7x4ElOAg2u/7yCy"
   }
 ]
