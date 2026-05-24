@@ -6,6 +6,7 @@ import type { Artwork } from "@/types";
 import ArtworkCard from "./ArtworkCard";
 
 export interface SwipeDeckHandle {
+  /** Advance the deck by one card without firing any like/pass callback. */
   advance: () => void;
   topArtwork: Artwork | null;
 }
@@ -15,7 +16,9 @@ interface SwipeDeckProps {
   onLike: (artwork: Artwork) => void;
   onPass: (artwork: Artwork) => void;
   onCardTap: (artwork: Artwork) => void;
+  /** Called whenever the top card changes (including swipes and resets). */
   onTopCardChange?: (artwork: Artwork | null) => void;
+  onDeckComplete?: () => void;
 }
 
 interface DraggableCardProps {
@@ -96,21 +99,31 @@ function DraggableCard({ artwork, onLike, onPass, onCardTap }: DraggableCardProp
 }
 
 const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
-  function SwipeDeck({ artworks, onLike, onPass, onCardTap, onTopCardChange }, ref) {
+  function SwipeDeck({ artworks, onLike, onPass, onCardTap, onTopCardChange, onDeckComplete }, ref) {
     const [topIndex, setTopIndex] = useState(0);
 
+    // Reset when artwork list changes (e.g. category filter)
     const artworkKey = useMemo(() => artworks.map((a) => a.id).join(","), [artworks]);
     const prevKeyRef = useRef(artworkKey);
-    if (artworkKey !== prevKeyRef.current) {
-      prevKeyRef.current = artworkKey;
-      // Defer to avoid calling setState during render
-      Promise.resolve().then(() => setTopIndex(0));
-    }
+    useEffect(() => {
+      if (artworkKey !== prevKeyRef.current) {
+        prevKeyRef.current = artworkKey;
+        queueMicrotask(() => setTopIndex(0));
+      }
+    }, [artworkKey]);
 
+    // Notify parent whenever the top card changes
     useEffect(() => {
       onTopCardChange?.(artworks[topIndex] ?? null);
     }, [topIndex, artworks, onTopCardChange]);
 
+    useEffect(() => {
+      if (artworks.length > 0 && topIndex >= artworks.length) {
+        onDeckComplete?.();
+      }
+    }, [artworks.length, onDeckComplete, topIndex]);
+
+    // Expose an advance() that just moves the deck forward (no callbacks)
     useImperativeHandle(ref, () => ({
       advance: () => setTopIndex((i) => i + 1),
       topArtwork: artworks[topIndex] ?? null,
@@ -163,7 +176,7 @@ const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
     return (
       <div className="relative w-full h-full">
         {[...visible].reverse().map((artwork, revIdx) => {
-          const stackIdx = visible.length - 1 - revIdx;
+          const stackIdx = visible.length - 1 - revIdx; // 0 = top card
           const isTop = stackIdx === 0;
           const scale = 1 - stackIdx * 0.04;
           const ty = stackIdx * 12;

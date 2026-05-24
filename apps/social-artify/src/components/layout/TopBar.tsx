@@ -1,3 +1,5 @@
+"use client";
+
 interface TopBarProps {
   onFilterClick?: () => void;
   pageTitle?: string;
@@ -6,6 +8,7 @@ interface TopBarProps {
 export default function TopBar({ onFilterClick, pageTitle = "Discover" }: TopBarProps) {
   return (
     <header className="flex items-center justify-between h-14 px-5 bg-background shrink-0">
+      {/* Logo — mobile seulement (la sidebar desktop l'affiche) */}
       <span
         className="text-xl font-bold text-text lg:hidden"
         style={{ fontFamily: "var(--font-serif)" }}
@@ -13,10 +16,12 @@ export default function TopBar({ onFilterClick, pageTitle = "Discover" }: TopBar
         Artify<span className="text-primary">.</span>
       </span>
 
+      {/* Titre de page — desktop seulement */}
       <span className="hidden lg:block text-sm font-semibold uppercase tracking-widest text-muted">
         {pageTitle}
       </span>
 
+      {/* Actions */}
       <div className="flex items-center gap-3">
         <button
           className="w-8 h-8 flex items-center justify-center rounded-full border border-border text-muted text-sm font-medium hover:bg-border transition-colors"

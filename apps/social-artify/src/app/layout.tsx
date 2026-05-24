@@ -40,6 +40,10 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="preconnect" href="https://upload.wikimedia.org" />
+        <link
+          href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          rel="stylesheet"
+        />
       </head>
       <body className={`${inter.variable} ${playfairDisplay.variable}`}>
         {/* ── Global animated background ── */}

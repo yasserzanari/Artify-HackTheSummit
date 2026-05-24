@@ -48,7 +48,7 @@ export default function OnboardingPage() {
 
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-widest mb-5 text-white/60 lg:text-muted">
-              A NEW WAY TO SEE ART
+              ART DISCOVERY, MADE SOCIAL
             </p>
 
             <h1
@@ -59,13 +59,13 @@ export default function OnboardingPage() {
                 letterSpacing: "-0.01em",
               }}
             >
-              Step closer<br />
-              to the canvas.
+              Discover art<br />
+              with people.
             </h1>
 
             <p className="text-sm leading-relaxed mb-8 text-white/65 lg:text-muted">
-              Scan any work in the museum to see it in 3D.<br />
-              Discover new artists. Listen to every painting.
+              Like, save, and explore artworks from anywhere.<br />
+              Then open AR when a piece is ready.
             </p>
 
             <button

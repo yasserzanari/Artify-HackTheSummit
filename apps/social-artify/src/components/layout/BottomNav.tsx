@@ -38,6 +38,7 @@ export default function BottomNav() {
 
   return (
     <>
+      {/* ── Mobile : pill flottant — caché sur desktop ── */}
       <nav
         className="lg:hidden fixed z-40 left-1/2 -translate-x-1/2"
         style={{
@@ -75,10 +76,12 @@ export default function BottomNav() {
         </div>
       </nav>
 
+      {/* ── Desktop : sidebar gauche fixe — cachée sur mobile ── */}
       <nav
         className="hidden lg:flex flex-col fixed left-0 top-0 h-full w-[200px] z-40 border-r border-border shrink-0"
         style={{ backgroundColor: "var(--color-surface)" }}
       >
+        {/* Logo */}
         <div className="px-6 pt-8 pb-6">
           <span
             className="text-xl font-bold text-text"
@@ -88,8 +91,10 @@ export default function BottomNav() {
           </span>
         </div>
 
+        {/* Séparateur */}
         <div className="h-px bg-border mx-4 mb-4" />
 
+        {/* Nav links verticaux */}
         <div className="flex flex-col gap-1 px-3">
           {tabs.map((tab) => {
             const isActive = tab.match(pathname);
