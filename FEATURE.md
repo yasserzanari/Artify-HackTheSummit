@@ -2,16 +2,19 @@
 
 > **HackTheSummit** · Plateforme sociale de découverte d'art avec expériences AR immersives
 
+Production : **https://artify.technoboost.ca**
+
 ---
 
 ## Vue d'ensemble
 
-LiveArt est un **monorepo** combinant deux applications complémentaires :
+LiveArt est un **monorepo** combinant trois applications :
 
 | App | Rôle |
 |---|---|
 | `apps/social-artify` | Plateforme sociale mobile-first : feed, likes, profil, quiz |
 | `apps/ar-web` | Viewer AR/3D : scanner des œuvres pour les voir prendre vie |
+| `apps/landing-page` | Landing page statique (prototype / assets) |
 
 L'idée centrale : l'utilisateur **découvre des œuvres** via un swipe-feed, puis peut les **vivre en réalité augmentée** en pointant son téléphone sur l'œuvre physique.
 
@@ -41,17 +44,26 @@ L'idée centrale : l'utilisateur **découvre des œuvres** via un swipe-feed, pu
 | Catégorie | Technologie | Version |
 |---|---|---|
 | AR Image Tracking | **MindAR** | intégré |
+| Vision client-side | **TensorFlow.js** | via MindAR |
 | Rendu 3D | **Three.js** | 0.184.0 |
 | Scène AR déclarative | **A-Frame** | 1.7.1 |
 | Animations 3D | **GSAP** | 3.15.0 |
 | Image Processing | **wasm-webp** | 0.1.0 |
 
 ### Intelligence Artificielle
-| Catégorie | Technologie | Version |
+| Catégorie | Technologie | Usage |
 |---|---|---|
-| Génération / narration | **Google GenAI** | 2.6.0 |
-| Reconnaissance vocale | **Google Cloud Speech** | 7.3.1 |
-| Auth cloud | **Google Auth Library** | 10.6.2 |
+| Q&A / narration / analyse | **Google Vertex AI (Gemini)** | prompts, living art, analyse d'image |
+| Génération vidéo | **Veo** (via API Vertex) | vidéos "living art" à partir d'une œuvre |
+| Reconnaissance vocale | **Google Cloud Speech-to-Text** | transcription micro → Q&A vocal |
+| Synthèse vocale | **Web Speech API** (navigateur) | narration TTS, accessibilité |
+| Auth cloud | **Google Auth Library** | accès services GCP |
+
+### Tests
+| Catégorie | Technologie |
+|---|---|
+| Unit / intégration | **Jest** + **Testing Library** |
+| Scripts de validation config | Node.js scripts (`apps/ar-web/test/`) |
 
 ---
 
@@ -192,43 +204,135 @@ artworks · activeCategory · setArtworks · setCategory · upsertArtwork · lik
 
 ## App `ar-web` — Fonctionnalités
 
-### Expériences AR Immersives
+### Expériences AR Immersives (`/ar`)
 
-- **WebAR sans app native** : fonctionne directement dans le navigateur mobile
+- **WebAR sans app native** : fonctionne directement dans le navigateur mobile (HTTPS requis)
 - **3 œuvres cibles** supportées :
   1. Mona Lisa (Léonard de Vinci)
   2. Starry Night (Van Gogh)
   3. The Scream (Edvard Munch)
-- **MindAR** pour le tracking d'images : reconnaissance + ancrage 3D sur l'œuvre scannée
+- **MindAR** pour le tracking d'images : reconnaissance de la cible physique + ancrage 3D
+  - Config : `imageTargetSrc: /ar/targets/artworks.mind`, `maxTrack: 1`, `autoStart: false`
+  - Lifecycle : `targetFound` / `targetLost`
+- **TensorFlow.js** pour le traitement de vision dans le navigateur (interne à MindAR)
 - **Three.js + A-Frame** pour le rendu des expériences visuelles
 - **GSAP** pour les animations d'entrée et effets sur les layers 3D
 - Chaque œuvre a ses propres **présets d'effets visuels**
 
 ---
 
-### Workbench MindAR (`/workbench`)
+### Objets AR
 
-- **Compilateur de targets** `.mind` directement dans le navigateur (via `window.MINDAR.IMAGE.Compiler`)
-- **Éditeur de métadonnées** des œuvres (titre, effets, paramètres)
-- **Présets d'effets** : `monaLisa` · `starryNight` · `scream`
-- API dédiée : `/api/workbench/*`
-- Output attendu : `apps/ar-web/public/ar/targets/artworks.mind`
+Chaque œuvre peut afficher des objets AR composites. Types supportés :
+
+| Type | Description |
+|---|---|
+| `text` | Texte flottant 3D |
+| `image` | Image statique ancrée |
+| `gif` | GIF animé |
+| `video` | Vidéo (avec support byte range) |
+| `model3d` | Modèle 3D |
+| `button` | Bouton interactif (raycast) |
+| `panel` | Panneau d'informations |
+| `portfolio` | Galerie d'images historiques |
+| `brush` | Animated WebP (Motion Brush) |
+
+Chaque objet stocke : `position`, `rotation`, `scale`, `width`, `height`, `opacity`, `color`, `src`, `action`, `portfolioItems`, `motionBrushData`
 
 ---
 
-### Intelligence Artificielle
+### Workbench MindAR (`/workbench`)
 
-- **Google GenAI** : génération de descriptions narratives et narrations vocales des œuvres
-- **Google Cloud Speech** : reconnaissance vocale pour des interactions parlées avec les œuvres
+- **Compilateur de targets** `.mind` dans le navigateur (via `window.MINDAR.IMAGE.Compiler`)
+- **Éditeur d'œuvres** : créer/modifier artworks, uploader l'image cible, compiler le `.mind`
+- **Placement visuel** des objets AR : position, taille, couleur, texte, src
+- **Preview** de la scène A-Frame directement dans le workbench
+- **Upload de portfolios** d'images historiques
+- **Attachment** de vidéos et images aux objets
+- **Modal AI Living Art** : décrire ce qui doit s'animer dans l'œuvre
+- **Modal Motion Brush** : peindre les zones animées manuellement
+- Output : `apps/ar-web/public/ar/targets/artworks.mind`
+- API dédiée : `/api/workbench/*`
+
+---
+
+### Motion Brush
+
+- **Peinture d'animations** : l'utilisateur peint les zones de l'œuvre à animer
+- **Définition de chemins de mouvement** sur chaque zone peinte
+- **Preview** du mouvement avant export
+- **Export en WebP animé** encodé côté client via `wasm-webp`
+- Le WebP généré s'utilise comme un asset image standard dans A-Frame (`brush` object)
+
+---
+
+### AI Living Art (Gemini + Veo)
+
+- **Google Vertex AI (Gemini)** :
+  - Q&A sur les œuvres en contexte AR
+  - Génération de prompts pour la création de vidéos Living Art
+  - Analyse de l'image d'une œuvre pour suggérer les parties à animer
+- **Veo (génération vidéo)** :
+  - Génère une vidéo animée à partir d'une œuvre et d'un prompt
+  - Sauvegarde la vidéo générée dans les assets publics
+  - Assigne automatiquement la vidéo à l'objet AR sélectionné
+- Variables d'environnement requises : `GOOGLE_APPLICATION_CREDENTIALS`, `GCP_PROJECT_ID`, `VERTEX_AI_LOCATION`, `VERTEX_AI_MODEL`
+
+**API routes :**
+| Endpoint | Description |
+|---|---|
+| `POST /api/gemini` | Q&A et génération de prompts |
+| `POST /api/workbench/ai-motion` | Analyse d'image + prompt Veo |
+
+---
+
+### Audio & Accessibilité
+
+**Narration audio**
+- Lecture de la narration de l'œuvre au `targetFound`
+- Pause automatique au `targetLost`
+- Contrôle mute/unmute
+- Gestion des restrictions autoplay mobile
+- Assets audio dans `apps/ar-web/public/ar/audio/`
+
+**Synthèse vocale (TTS)**
+- Web Speech API navigateur pour la narration en temps réel
+- Overlay d'accessibilité avec lecture du contenu AR
+
+**Reconnaissance vocale (STT)**
+- Google Cloud Speech-to-Text pour transcrire l'audio du micro
+- Support du flow Q&A vocal : l'utilisateur parle, Gemini répond
+- API route : `POST /api/stt`
+
+---
+
+### Asset Serving
+
+- Upload d'assets depuis le workbench (images, vidéos, WebP animés)
+- Serving avec headers corrects (MIME types, CORS)
+- Support des **byte ranges** pour la lecture vidéo progressive
+- API : `/api/workbench/assets/[...assetPath]`
 
 ---
 
 ### Infrastructure & Déploiement
 
 - **HTTPS local** avec `mkcert` pour tester la caméra sur iOS (Safari)
-- **Reverse proxy** Caddy ou Nginx recommandé en production (HTTPS automatique)
-- **Déploiement VM** : script de déploiement + service `systemd`, sélection automatique de port libre
+- **Reverse proxy** Caddy ou Nginx en production (HTTPS automatique)
+- **Service systemd** (`hackthesummit-ar`) sur port `3287`, sélection automatique de port libre
 - **Déploiement distant** via script Python
+- **Production** : https://artify.technoboost.ca
+
+---
+
+### Tests (ar-web)
+
+- **Jest** avec Testing Library pour les services, composants d'accessibilité, routes Gemini/STT
+- **Scripts Node** dans `apps/ar-web/test/` pour valider :
+  - Configuration Starry Night
+  - Configuration des objets portfolio
+  - Configuration de stabilisation MindAR
+  - Verrouillage du ratio vidéo
 
 ---
 
@@ -248,7 +352,7 @@ interface User {
 }
 ```
 
-### Artwork
+### Artwork (social-artify)
 ```typescript
 interface Artwork {
   id: string
@@ -260,18 +364,52 @@ interface Artwork {
   dimensions?: string
   museum?: string
   location?: string
-  categories: string[]        // ex: ["Renaissance", "Portraits"]
+  categories: string[]
   imageUrl: string
   has3D: boolean
   arWebId?: string            // lien vers l'expérience ar-web
   description?: string
   likes: number
-  likedBy: string[]           // IDs utilisateurs
-  savedBy: string[]           // IDs utilisateurs
+  likedBy: string[]
+  savedBy: string[]
   isLikedByMe?: boolean       // calculé côté serveur
   isSavedByMe?: boolean       // calculé côté serveur
   createdAt: string
 }
+```
+
+### Artwork Config AR (ar-web)
+```typescript
+// apps/ar-web/src/data/artworks.ts + src/types/ar.ts
+{
+  title: string
+  artist: string
+  year: number
+  summary: string
+  history: string
+  audioUrl: string
+  targetIndex: number         // ordre dans artworks.mind
+  targetImageUrl: string
+  historicalImages: string[]
+  arSceneType: string
+  arObjects: ArObject[]
+}
+```
+
+---
+
+## Flux d'utilisation AR (Runtime Flow)
+
+```
+Visiteur ouvre /ar
+  → tap "Start"
+  → A-Frame + MindAR se chargent
+  → MindAR charge artworks.mind
+  → le navigateur ouvre la caméra
+  → MindAR reconnaît le targetIndex de l'œuvre scannée
+  → React sélectionne la config artwork correspondante
+  → A-Frame rend les objets AR au-dessus de la cible
+  → audio / vidéo / panels / Living Art s'exécutent
 ```
 
 ---
@@ -285,13 +423,20 @@ LiveArt/
 │   │   ├── src/app/            # Pages Next.js (App Router)
 │   │   ├── src/components/     # Composants UI
 │   │   ├── src/hooks/          # Hooks Zustand + fetch
-│   │   └── data/               # artworks.json + users.json
+│   │   └── data/               # artworks.json + users.json (ignoré du Git)
 │   ├── ar-web/                 # App AR/3D
-│   │   ├── src/                # Pages, composants, data AR
-│   │   ├── public/ar/          # Targets MindAR + images sources
+│   │   ├── src/app/            # Pages + API routes
+│   │   ├── src/components/     # ARExperience, Workbench, Accessibilité
+│   │   ├── src/services/       # AI (Gemini), TTS, STT, audio
+│   │   ├── src/data/           # artworks.ts, narrationData.ts
+│   │   ├── public/ar/          # Targets MindAR, audio, images, libs
+│   │   ├── public/vendor/      # wasm-webp runtime
+│   │   ├── test/               # Scripts de validation config
 │   │   └── docs/               # Guides HTTPS, déploiement VM
-│   ├── front-ui/               # (placeholder — future UI principale)
-│   └── social/                 # (placeholder — features sociales futures)
+│   ├── landing-page/           # Landing page statique
+│   ├── front-ui/               # (placeholder)
+│   └── social/                 # (placeholder)
+├── docs/                       # Documentation technique, handoff, plans
 └── tools/
     └── mind-workshop/          # Workshop compilation targets .mind
 ```
@@ -301,10 +446,10 @@ LiveArt/
 ## Intégration entre les Apps
 
 ```
-social-artify  ──(has3D = true)──►  ar-web
-                                    ↑
-                    buildArExperienceUrl(arWebId)
-                    Ouvre dans un nouvel onglet
+social-artify  ──(has3D = true)──►  ar-web (/ar)
+                                       ↑
+                       buildArExperienceUrl(arWebId)
+                       Ouvre dans un nouvel onglet
 ```
 
 Le champ `arWebId` sur une œuvre sert à construire l'URL de l'expérience AR. L'utilisateur reste dans `social-artify` et l'expérience s'ouvre dans `ar-web` au tap du bouton **"Voir en 3D"**.
