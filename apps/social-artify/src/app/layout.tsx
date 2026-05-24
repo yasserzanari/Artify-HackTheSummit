@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import ArtQuiz from "@/components/quiz/ArtQuiz";
 
 // Body — neutral, modern, ultra-readable
 const inter = Inter({
@@ -69,6 +70,7 @@ export default function RootLayout({
           />
         </div>
         {children}
+        <ArtQuiz />
       </body>
     </html>
   );

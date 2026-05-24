@@ -6,11 +6,20 @@ import { useAuthStore } from "@/store/authStore";
 import { useFeedStore } from "@/store/feedStore";
 import BottomNav from "@/components/layout/BottomNav";
 import AuthModal from "@/components/auth/AuthModal";
+import type { ArtProfile } from "@/lib/types";
+
+const PROFILE_META: Record<ArtProfile, { name: string; icon: string }> = {
+  renaissance: { name: "Renaissance",  icon: "architecture" },
+  moderne:     { name: "Moderne",       icon: "brush" },
+  abstrait:    { name: "Abstrait",      icon: "auto_awesome" },
+  surrealisme: { name: "Surréalisme",   icon: "psychology" },
+};
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user, isLoggedIn, logout, isGuest } = useAuth();
   const openAuthModal = useAuthStore((s) => s.openAuthModal);
+  const setShowQuiz = useAuthStore((s) => s.setShowQuiz);
   const artworks = useFeedStore((s) => s.artworks);
 
   // Si pas connecté et pas guest → onboarding
@@ -79,6 +88,44 @@ export default function ProfilePage() {
                 {roleLabel}
               </span>
             </div>
+
+            {/* ── Profil artistique ── */}
+            {user.artProfile ? (
+              <div className="bg-surface rounded-2xl px-5 py-4 mb-6 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: "#F3E1E8" }}
+                  >
+                    <span className="material-icons" style={{ fontSize: "18px", color: "#810B38" }}>
+                      {PROFILE_META[user.artProfile].icon}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted">
+                      Profil artistique
+                    </p>
+                    <p className="text-sm font-bold text-text" style={{ fontFamily: "var(--font-serif)" }}>
+                      {PROFILE_META[user.artProfile].name}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowQuiz(true)}
+                  className="text-xs font-semibold text-primary underline underline-offset-2 active:opacity-70"
+                >
+                  Refaire
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowQuiz(true)}
+                className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl border-2 border-dashed border-border text-muted text-sm font-medium mb-6 active:scale-95 transition-transform"
+              >
+                <span className="material-icons" style={{ fontSize: "18px" }}>quiz</span>
+                Découvrir mon profil artistique
+              </button>
+            )}
 
             {/* ── Stats ── */}
             <div className="flex gap-3 mb-6">

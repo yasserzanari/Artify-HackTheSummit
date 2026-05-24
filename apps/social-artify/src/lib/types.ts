@@ -1,5 +1,7 @@
 export type Role = "guest" | "viewer" | "artist";
 
+export type ArtProfile = "renaissance" | "moderne" | "abstrait" | "surrealisme";
+
 export interface User {
   id: string;
   name: string;
@@ -7,6 +9,7 @@ export interface User {
   role: Role;
   avatar?: string;
   createdAt: string;
+  artProfile?: ArtProfile;
 }
 
 export interface Artwork {

@@ -54,7 +54,10 @@ export default function AuthModal() {
     if (pendingAction?.type === "like" && pendingAction.artworkId) {
       replayLike();
     }
-    close();
+    // Close modal — quiz opens automatically via setShowQuiz(true) in registerUser
+    setAuthModalOpen(false);
+    setPendingAction(null);
+    setError("");
   };
 
   const inputCls =

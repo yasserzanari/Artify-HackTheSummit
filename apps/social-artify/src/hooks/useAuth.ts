@@ -37,9 +37,13 @@ export function useAuth() {
     return false;
   };
 
+  const setShowQuiz = useAuthStore((s) => s.setShowQuiz);
+  const setUserProfile = useAuthStore((s) => s.setUserProfile);
+
   const registerUser = (name: string, email: string, role: Role) => {
     const u = mockRegister(name, email, role);
     login(u);
+    setShowQuiz(true);
     return u;
   };
 
@@ -64,5 +68,7 @@ export function useAuth() {
     browseAsGuest,
     setPendingAction,
     setAuthModalOpen,
+    setShowQuiz,
+    setUserProfile,
   };
 }

@@ -1,6 +1,6 @@
 "use client";
 import { create } from "zustand";
-import type { User } from "@/lib/types";
+import type { User, ArtProfile } from "@/lib/types";
 
 interface PendingAction {
   type: string;
@@ -13,6 +13,7 @@ interface AuthStore {
   pendingAction: PendingAction | null;
   authModalOpen: boolean;
   authModalTab: "login" | "register";
+  showQuiz: boolean;
   login: (user: User) => void;
   logout: () => void;
   setGuest: (val: boolean) => void;
@@ -20,6 +21,8 @@ interface AuthStore {
   setAuthModalOpen: (open: boolean) => void;
   setAuthModalTab: (tab: "login" | "register") => void;
   openAuthModal: (tab: "login" | "register") => void;
+  setShowQuiz: (val: boolean) => void;
+  setUserProfile: (profile: ArtProfile) => void;
 }
 
 export const useAuthStore = create<AuthStore>()((set) => ({
@@ -28,6 +31,7 @@ export const useAuthStore = create<AuthStore>()((set) => ({
   pendingAction: null,
   authModalOpen: false,
   authModalTab: "login",
+  showQuiz: false,
   login: (user) =>
     set({ user, isGuest: false, pendingAction: null, authModalOpen: false }),
   logout: () => set({ user: null, isGuest: false }),
@@ -36,4 +40,7 @@ export const useAuthStore = create<AuthStore>()((set) => ({
   setAuthModalOpen: (open) => set({ authModalOpen: open }),
   setAuthModalTab: (tab) => set({ authModalTab: tab }),
   openAuthModal: (tab) => set({ authModalOpen: true, authModalTab: tab }),
+  setShowQuiz: (val) => set({ showQuiz: val }),
+  setUserProfile: (profile) =>
+    set((s) => ({ user: s.user ? { ...s.user, artProfile: profile } : null })),
 }));

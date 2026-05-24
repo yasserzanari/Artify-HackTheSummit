@@ -1,5 +1,5 @@
 // Mock auth — all state lives in localStorage, no real server
-import type { User, Role } from "./types";
+import type { User, Role, ArtProfile } from "./types";
 
 const STORAGE_KEY = "social-artify-user";
 
@@ -34,4 +34,11 @@ export function login(email: string): User | null {
 
 export function logout(): void {
   localStorage.removeItem(STORAGE_KEY);
+}
+
+export function saveUserProfile(profile: ArtProfile): void {
+  const user = getStoredUser();
+  if (!user) return;
+  user.artProfile = profile;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
 }
