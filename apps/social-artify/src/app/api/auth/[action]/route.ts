@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { register, login, me, updateUser } from "@/server/services/auth.service";
 import { verifyToken, COOKIE_OPTIONS } from "@/server/middleware/jwt";
+import { SOCIAL_AUTH_COOKIE } from "@/lib/auth";
 
 type Params = { params: Promise<{ action: string }> };
 
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   if (action === "logout") {
     const res = NextResponse.json({ ok: true });
-    res.cookies.delete("token");
+    res.cookies.delete(SOCIAL_AUTH_COOKIE);
     return res;
   }
 
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       if (!email || !password) return err("Missing fields", 400);
       const { user, token } = await login(email, password);
       const res = NextResponse.json({ user });
-      res.cookies.set("token", token, COOKIE_OPTIONS);
+      res.cookies.set(SOCIAL_AUTH_COOKIE, token, COOKIE_OPTIONS);
       return res;
     }
 
@@ -46,7 +47,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       if (!name || !email || !password) return err("Missing fields", 400);
       const { user, token } = await register(name, email, password, role);
       const res = NextResponse.json({ user }, { status: 201 });
-      res.cookies.set("token", token, COOKIE_OPTIONS);
+      res.cookies.set(SOCIAL_AUTH_COOKIE, token, COOKIE_OPTIONS);
       return res;
     }
 
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
 export async function PATCH(req: NextRequest, { params }: Params) {
   const { action } = await params;
-  if (action !== "profile") return err("Not found", 404);
+  if (action !== "user") return err("Not found", 404);
   try {
     const payload = await verifyToken(req);
     if (!payload) return err("Not logged in", 401);

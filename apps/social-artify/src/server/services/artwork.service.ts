@@ -6,15 +6,19 @@ function toClient(artwork: Artwork, userId?: string) {
   const { likedBy, savedBy, ...rest } = artwork;
   return {
     ...rest,
-    isLikedByMe: userId ? likedBy.includes(userId) : false,
-    isSavedByMe: userId ? savedBy.includes(userId) : false,
+    isLikedByMe: userId ? (likedBy ?? []).includes(userId) : false,
+    isSavedByMe: userId ? (savedBy ?? []).includes(userId) : false,
   };
 }
 
 export function getAll(userId?: string, category?: string | null) {
   let artworks = db.artworks.getAll();
-  if (category && category !== "All")
-    artworks = artworks.filter((a) => a.categories.includes(category));
+  if (category && category !== "All") {
+    if (category === "New 3D")
+      artworks = artworks.filter((a) => a.has3D);
+    else
+      artworks = artworks.filter((a) => a.categories.includes(category));
+  }
   return artworks.map((a) => toClient(a, userId));
 }
 
@@ -29,6 +33,7 @@ export function toggleLike(id: string, userId: string) {
   const artwork = artworks.find((a) => a.id === id);
   if (!artwork) return null;
 
+  artwork.likedBy = artwork.likedBy ?? [];
   const liked = artwork.likedBy.includes(userId);
   if (liked) {
     artwork.likedBy = artwork.likedBy.filter((uid) => uid !== userId);
@@ -47,6 +52,7 @@ export function toggleSave(id: string, userId: string) {
   const artwork = artworks.find((a) => a.id === id);
   if (!artwork) return null;
 
+  artwork.savedBy = artwork.savedBy ?? [];
   const saved = artwork.savedBy.includes(userId);
   if (saved) artwork.savedBy = artwork.savedBy.filter((uid) => uid !== userId);
   else artwork.savedBy.push(userId);
